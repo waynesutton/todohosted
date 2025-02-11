@@ -1,6 +1,6 @@
 # TodoHosted
 
-TodoHosted is an open-source todo application built with Convex as the backend database.
+TodoHosted is an open-source todo application built with Convex as the backend database
 
 ## Getting Started
 
