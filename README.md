@@ -1,5 +1,7 @@
 # TodoHosted
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 TodoHosted is an open-source todo application built with Convex as the backend database
 
 ## Getting Started
@@ -21,4 +23,4 @@ Please read our [Contributing Guide](.github/CONTRIBUTING.md) before submitting 
 
 ## License
 
-MIT
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
