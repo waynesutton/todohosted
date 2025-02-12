@@ -345,17 +345,30 @@ function MainApp() {
         </div>
       </main>
 
+      {/* Convex Logo Section */}
+      <div className="flex justify-center my-8">
+        {isDark ? (
+          <a href="https://convex.dev" target="_blank" rel="noopener noreferrer">
+            <img src="/convex-white.svg" alt="Convex Logo" className="h-12" />
+          </a>
+        ) : (
+          <a href="https://convex.dev" target="_blank" rel="noopener noreferrer">
+            <img src="/convex-black.svg" alt="Convex Logo" className="h-12" />
+          </a>
+        )}
+      </div>
+
       {/* Footer */}
-      <footer className="relative w-full py-6 px-4 mt-[40px]">
+      <footer className="relative w-full py-6 px-4 mt-[0px]">
         <div className="max-w-7xl mx-auto text-center">
           <p className={`${iconClasses} text-sm mb-2`}>
-            All Chats and Reminders are cleared daily.{" "}
+            All Chats and Reminders are cleared daily via{" "}
             <a
-              href="https://www.cronvex.com"
+              href="https://docs.convex.dev/scheduling/cron-jobs"
               target="_blank"
               rel="noopener noreferrer"
               className="text-blue-500 hover:opacity-80 transition-opacity">
-              Learn more at Cronvex
+              Convex Cron Jobs
             </a>
           </p>
           <p className={`${iconClasses} text-sm`}>
