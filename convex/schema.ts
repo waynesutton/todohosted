@@ -5,5 +5,10 @@ export default defineSchema({
   todos: defineTable({
     text: v.string(),
     completed: v.boolean(),
+  }),
+  messages: defineTable({
+    text: v.string(),
+    sender: v.string(),
+    timestamp: v.number()
   })
 }); 
