@@ -10,6 +10,8 @@ export const add = mutation(async (ctx, { text }: { text: string }) => {
   await ctx.db.insert("todos", {
     text,
     completed: false,
+    upvotes: 0,
+    downvotes: 0
   });
 });
 
@@ -21,4 +23,16 @@ export const toggle = mutation(async (ctx, { id }: { id: Id<"todos"> }) => {
 
 export const remove = mutation(async (ctx, { id }: { id: Id<"todos"> }) => {
   await ctx.db.delete(id);
+});
+
+export const upvote = mutation(async ({ db }, { id }: { id: Id<"todos"> }) => {
+  const todo = await db.get(id);
+  if (!todo) return;
+  await db.patch(id, { upvotes: (todo.upvotes ?? 0) + 1 });
+});
+
+export const downvote = mutation(async ({ db }, { id }: { id: Id<"todos"> }) => {
+  const todo = await db.get(id);
+  if (!todo) return;
+  await db.patch(id, { downvotes: (todo.downvotes ?? 0) + 1 });
 }); 

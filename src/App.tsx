@@ -9,20 +9,38 @@ import {
   Sun,
   Moon,
   Smile,
+  Heart,
+  ThumbsUp,
+  ThumbsDown,
 } from "lucide-react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../convex/_generated/api";
 
 const HAPPY_EMOJIS = ["😊", "😄", "🎉", "✨", "🌟"];
 
-const MessageItem = ({ message, isDark, textClasses }) => (
-  <div className={`${isDark ? "bg-zinc-800/50" : "bg-zinc-100"} rounded-lg p-4 mb-2 animate-glow`}>
-    <div className={`${isDark ? "text-zinc-400" : "text-zinc-600"} text-sm mb-1`}>
-      {message.sender}
+const MessageItem = ({ message, isDark, textClasses }) => {
+  const toggleLike = useMutation(api.messages.toggleLike);
+
+  return (
+    <div
+      className={`${isDark ? "bg-zinc-800/50" : "bg-zinc-100"} rounded-lg p-4 mb-2 animate-glow`}>
+      <div className="flex justify-between items-start">
+        <div>
+          <div className={`${isDark ? "text-zinc-400" : "text-zinc-600"} text-sm mb-1`}>
+            {message.sender}
+          </div>
+          <div className={textClasses}>{message.text}</div>
+        </div>
+        <button
+          onClick={() => toggleLike({ id: message._id })}
+          className={`${isDark ? "text-zinc-400" : "text-zinc-600"} hover:text-red-500 transition-colors flex items-center gap-1`}>
+          <Heart className={`w-4 h-4 ${message.likes ? "fill-red-500 text-red-500" : ""}`} />
+          {message.likes > 0 && <span className="text-sm">{message.likes}</span>}
+        </button>
+      </div>
     </div>
-    <div className={textClasses}>{message.text}</div>
-  </div>
-);
+  );
+};
 
 function App() {
   const [isDark, setIsDark] = useState(false);
@@ -32,6 +50,8 @@ function App() {
   const toggleTodo = useMutation(api.todos.toggle);
   const deleteTodo = useMutation(api.todos.remove);
   const sendMessage = useMutation(api.messages.send);
+  const upvote = useMutation(api.todos.upvote);
+  const downvote = useMutation(api.todos.downvote);
 
   const [newTodo, setNewTodo] = useState("");
   const [newMessage, setNewMessage] = useState("");
@@ -148,11 +168,29 @@ function App() {
                       className={`flex-1 ${todo.completed ? "text-zinc-500 line-through" : iconClasses}`}>
                       {todo.text}
                     </span>
-                    <button
-                      onClick={() => deleteTodo({ id: todo._id })}
-                      className={`opacity-0 group-hover:opacity-100 ${iconClasses} hover:text-red-400 transition-all`}>
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => upvote({ id: todo._id })}
+                        className={`${iconClasses} hover:text-green-500 transition-colors flex items-center gap-1`}>
+                        <ThumbsUp
+                          className={`w-4 h-4 ${todo.upvotes ? "fill-green-500 text-green-500" : ""}`}
+                        />
+                        {todo.upvotes > 0 && <span className="text-sm">{todo.upvotes}</span>}
+                      </button>
+                      <button
+                        onClick={() => downvote({ id: todo._id })}
+                        className={`${iconClasses} hover:text-red-500 transition-colors flex items-center gap-1`}>
+                        <ThumbsDown
+                          className={`w-4 h-4 ${todo.downvotes ? "fill-red-500 text-red-500" : ""}`}
+                        />
+                        {todo.downvotes > 0 && <span className="text-sm">{todo.downvotes}</span>}
+                      </button>
+                      <button
+                        onClick={() => deleteTodo({ id: todo._id })}
+                        className={`opacity-0 group-hover:opacity-100 ${iconClasses} hover:text-red-400 transition-all`}>
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
