@@ -102,7 +102,11 @@ function App() {
       {/* Header */}
       <header className="relative w-full py-6 px-4 border-b border-zinc-200">
         <div className="max-w-7xl mx-auto flex justify-between items-center font-['Inter']">
-          <h1 className={`${iconClasses} text-xl font-bold`}>Convex in Sync</h1>
+          <h1 className={`${iconClasses} text-xl font-bold`}>
+            <a href="http://convex.dev" target="_blank" rel="noopener noreferrer">
+              Convex in Sync Demo
+            </a>
+          </h1>
           <div className="flex items-center gap-6">
             <a
               href="https://convex.dev"
@@ -249,7 +253,30 @@ function App() {
       <footer className="relative w-full py-6 px-4 mt-20">
         <div className="max-w-7xl mx-auto text-center">
           <p className={`${iconClasses} text-sm`}>
-            Built with ❤️ at Convex. Powered by Convex. The source code is available on GitHub.
+            Built with ❤️ at{" "}
+            <a
+              href="https://convex.dev"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:opacity-80 transition-opacity">
+              Convex
+            </a>
+            . Powered by{" "}
+            <a
+              href="https://convex.dev"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:opacity-80 transition-opacity">
+              Convex
+            </a>
+            . The open source code is available on{" "}
+            <a
+              href="https://github.com/waynesutton/todohosted"
+              target="_blank"
+              rel="noopener noreferrer">
+              GitHub
+            </a>
+            .
           </p>
         </div>
       </footer>
