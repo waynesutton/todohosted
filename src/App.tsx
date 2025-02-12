@@ -84,7 +84,7 @@ function App() {
   const iconClasses = isDark ? "text-zinc-400" : "text-zinc-600";
   const cardClasses = isDark ? "bg-zinc-900" : "bg-white border border-zinc-200 shadow-sm";
   const textClasses = isDark ? "text-zinc-400" : "text-zinc-600";
-  const bgClasses = isDark ? "bg-slate-950" : "bg-white";
+  const bgClasses = isDark ? "bg-slate-950" : "bg-[#F5F5F4]";
 
   return (
     <div className={`min-h-screen ${cardClasses} relative flex flex-col font-['Inter']`}>
@@ -100,7 +100,7 @@ function App() {
       </div>
 
       {/* Header */}
-      <header className="relative w-full py-6 px-4 border-b border-zinc-200">
+      <header className="relative w-full py-6 px-4">
         <div className="max-w-7xl mx-auto flex justify-between items-center font-['Inter']">
           <h1 className={`${iconClasses} text-xl font-bold`}>
             <a href="http://convex.dev" target="_blank" rel="noopener noreferrer">
@@ -132,7 +132,7 @@ function App() {
       </header>
 
       {/* Content */}
-      <main className="relative flex-1 flex flex-col items-center px-4">
+      <main className={`relative flex-1 flex flex-col items-center px-4 ${bgClasses}`}>
         <div className="absolute top-0 z-[-2] h-screen w-screen bg-neutral-950 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))]"></div>
         <div className="w-full max-w-7xl flex flex-col md:flex-row gap-6 relative items-start mt-8">
           {/* Todo Column */}
@@ -252,6 +252,16 @@ function App() {
       {/* Footer */}
       <footer className="relative w-full py-6 px-4 mt-20">
         <div className="max-w-7xl mx-auto text-center">
+          <p className={`${iconClasses} text-sm mb-2`}>
+            All Chats and Reminders are cleared daily.{" "}
+            <a
+              href="https://www.cronvex.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-500 hover:opacity-80 transition-opacity">
+              Learn more at Cronvex
+            </a>
+          </p>
           <p className={`${iconClasses} text-sm`}>
             Built with ❤️ at{" "}
             <a
@@ -269,7 +279,7 @@ function App() {
               className="hover:opacity-80 transition-opacity">
               Convex
             </a>
-            . The open source code is available on{" "}
+            . The source code is available on{" "}
             <a
               href="https://github.com/waynesutton/todohosted"
               target="_blank"
