@@ -13,5 +13,9 @@ export default defineSchema({
     sender: v.string(),
     timestamp: v.number(),
     likes: v.optional(v.number()),
+    textVector: v.optional(v.array(v.float64())),
+  }).vectorIndex("by_text", {
+    vectorField: "textVector",
+    dimensions: 100, // Using smaller dimensions for basic text similarity
   }),
 });

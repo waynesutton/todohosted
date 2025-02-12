@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import {
   PlusCircle,
   Circle,
@@ -12,24 +13,29 @@ import {
   Heart,
   ThumbsUp,
   ThumbsDown,
+  X,
+  Search,
 } from "lucide-react";
-import { useMutation, useQuery } from "convex/react";
+import { useMutation, useQuery, useAction } from "convex/react";
 import { api } from "../convex/_generated/api";
+import ModPage from "./ModPage";
 
 const HAPPY_EMOJIS = ["😊", "😄", "🎉", "✨", "🌟"];
 
-const MessageItem = ({ message, isDark, textClasses }) => {
+const MessageItem = ({ message, isDark, textClasses, isSelected }) => {
   const toggleLike = useMutation(api.messages.toggleLike);
 
   return (
     <div
-      className={`${isDark ? "bg-zinc-800/50" : "bg-zinc-100"} rounded-lg p-4 mb-2 animate-glow`}>
+      className={`${isDark ? "bg-zinc-800/50" : "bg-zinc-100"} 
+        ${isSelected ? "ring-2 ring-blue-500" : ""} 
+        rounded-lg p-4 mb-2 animate-glow transition-all`}>
       <div className="flex justify-between items-start">
         <div>
-          <div className={`${isDark ? "text-zinc-400" : "text-zinc-600"} text-sm mb-1`}>
+          <div className={`${isDark ? "text-zinc-400" : "text-zinc-600"} text-xs mb-1`}>
             {message.sender}
           </div>
-          <div className={textClasses}>{message.text}</div>
+          <div className={`${textClasses} text-sm`}>{message.text}</div>
         </div>
         <button
           onClick={() => toggleLike({ id: message._id })}
@@ -43,6 +49,17 @@ const MessageItem = ({ message, isDark, textClasses }) => {
 };
 
 function App() {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<MainApp />} />
+        <Route path="/mod" element={<ModPage />} />
+      </Routes>
+    </Router>
+  );
+}
+
+function MainApp() {
   const [isDark, setIsDark] = useState(false);
   const todos = useQuery(api.todos.get) ?? [];
   const messages = useQuery(api.messages.get) ?? [];
@@ -58,6 +75,13 @@ function App() {
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  // Add search state
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedMessageIds, setSelectedMessageIds] = useState<Id<"messages">[]>([]);
+
+  // Add search function
+  const searchMessages = useAction(api.messages.searchMessages);
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
@@ -72,13 +96,19 @@ function App() {
   const handleSubmitMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newMessage.trim()) return;
-    await sendMessage({ text: newMessage.trim(), sender: "User" });
+    await sendMessage({
+      text: newMessage.trim(),
+      sender: "User",
+    });
     setNewMessage("");
   };
 
   const sendEmoji = () => {
     const randomEmoji = HAPPY_EMOJIS[Math.floor(Math.random() * HAPPY_EMOJIS.length)];
-    sendMessage({ text: randomEmoji, sender: "User" });
+    sendMessage({
+      text: randomEmoji,
+      sender: "User",
+    });
   };
 
   const iconClasses = isDark ? "text-zinc-400" : "text-zinc-600";
@@ -137,13 +167,13 @@ function App() {
         <div className="w-full max-w-7xl flex flex-col md:flex-row gap-6 relative items-start mt-8">
           {/* Todo Column */}
           <div className="flex-1">
-            <h2 className={`text-2xl font-bold mb-4 tracking-tighter ${iconClasses}`}>Reminders</h2>
+            <h2 className={`text-xl font-bold mb-3 tracking-tighter ${iconClasses}`}>Reminders</h2>
             <div
-              className={`${cardClasses} rounded-lg p-6 hover:border-zinc-300 transition-colors`}>
+              className={`${cardClasses} rounded-lg p-4 hover:border-zinc-300 transition-colors`}>
               <form onSubmit={handleSubmitTodo} className="mb-6">
                 <div
-                  className={`flex items-center gap-4 ${isDark ? "bg-zinc-800" : "bg-white"} rounded-lg p-4`}>
-                  <PlusCircle className={`${isDark ? "text-zinc-400" : "text-black"} w-5 h-5`} />
+                  className={`flex items-center gap-3 ${isDark ? "bg-zinc-800" : "bg-white"} rounded-lg p-3`}>
+                  <PlusCircle className="w-4 h-4" />
                   <input
                     type="text"
                     value={newTodo}
@@ -158,7 +188,7 @@ function App() {
                 {todos.map((todo) => (
                   <div
                     key={todo._id}
-                    className={`flex items-center gap-4 p-4 ${isDark ? "bg-zinc-800/50" : "bg-zinc-100"} rounded-lg group`}>
+                    className={`flex items-center gap-3 p-3 ${isDark ? "bg-zinc-800/50" : "bg-zinc-100"} rounded-lg group`}>
                     <button
                       onClick={() => toggleTodo({ id: todo._id })}
                       className={`${iconClasses} hover:opacity-80 transition-colors`}>
@@ -203,8 +233,9 @@ function App() {
 
           {/* Chat Column */}
           <div className="flex-1">
-            <h2 className={`text-2xl font-bold mb-4 tracking-tighter ${iconClasses}`}>Chat</h2>
-            <div className={`${cardClasses} rounded-lg p-6 h-[600px] flex flex-col`}>
+            <h2 className={`text-xl font-bold mb-3 tracking-tighter ${iconClasses}`}>Chat</h2>
+            <div className={`${cardClasses} rounded-lg p-4 h-[500px] flex flex-col mb-6`}>
+              {/* Chat Box */}
               <div className="flex-1 overflow-y-auto mb-4">
                 <div className="flex flex-col h-full">
                   <div className="space-y-2 mt-auto">
@@ -214,13 +245,13 @@ function App() {
                         message={message}
                         isDark={isDark}
                         textClasses={textClasses}
+                        isSelected={searchQuery === "" && selectedMessageIds.includes(message._id)}
                       />
                     ))}
                     <div ref={messagesEndRef} />
                   </div>
                 </div>
               </div>
-
               <form onSubmit={handleSubmitMessage}>
                 <div
                   className={`${isDark ? "bg-zinc-800" : "bg-zinc-100"} rounded-lg p-4 flex items-center gap-4`}>
@@ -235,22 +266,87 @@ function App() {
                     type="button"
                     onClick={sendEmoji}
                     className={`${isDark ? "text-zinc-400" : "text-zinc-600"} hover:text-yellow-500 transition-colors`}>
-                    <Smile className="w-5 h-5" />
+                    <Smile className="w-4 h-4" />
                   </button>
                   <button
                     type="submit"
                     className={`${isDark ? "text-zinc-400" : "text-zinc-600"} hover:text-blue-500 transition-colors`}>
-                    <Send className="w-5 h-5" />
+                    <Send className="w-4 h-4" />
                   </button>
                 </div>
               </form>
+            </div>
+
+            {/* Separately styled Search Messages Box */}
+            <h2 className={`text-xl font-bold mb-3 tracking-tighter ${iconClasses}`}>
+              Search Messages
+            </h2>
+            <div className={`${cardClasses} rounded-lg p-4`}>
+              <div
+                className={`${isDark ? "bg-zinc-800" : "bg-zinc-100"} rounded-lg p-4 flex items-center gap-4`}>
+                <Search className="w-4 h-4 text-zinc-400" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    if (e.target.value) {
+                      searchMessages({ query: e.target.value })
+                        .then((results) => {
+                          console.log("Search results received:", results);
+                          setSelectedMessageIds(results);
+                        })
+                        .catch((error) => {
+                          console.error("Search error:", error);
+                          setSelectedMessageIds([]);
+                        });
+                    } else {
+                      setSelectedMessageIds([]);
+                    }
+                  }}
+                  placeholder="Search messages..."
+                  className={`bg-transparent flex-1 outline-none ${textClasses} placeholder-zinc-500`}
+                />
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSearchQuery("");
+                      setSelectedMessageIds([]);
+                    }}
+                    className={`${isDark ? "text-zinc-400" : "text-zinc-600"} hover:text-red-500 transition-colors`}>
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+
+              {searchQuery && (
+                <div className="mt-4 space-y-2">
+                  <div className={`${textClasses} text-sm font-medium`}>
+                    Search Results {selectedMessageIds.length === 0 && "(No matches found)"}
+                  </div>
+                  <div className="overflow-y-auto space-y-2">
+                    {messages
+                      .filter((m) => selectedMessageIds.includes(m._id))
+                      .map((message) => (
+                        <MessageItem
+                          key={message._id}
+                          message={message}
+                          isDark={isDark}
+                          textClasses={textClasses}
+                          isSelected={false}
+                        />
+                      ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
       </main>
 
       {/* Footer */}
-      <footer className="relative w-full py-6 px-4 mt-20">
+      <footer className="relative w-full py-6 px-4 mt-[40px]">
         <div className="max-w-7xl mx-auto text-center">
           <p className={`${iconClasses} text-sm mb-2`}>
             All Chats and Reminders are cleared daily.{" "}

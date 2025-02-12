@@ -14,6 +14,7 @@ import type {
   FunctionReference,
 } from "convex/server";
 import type * as cleanup from "../cleanup.js";
+import type * as config from "../config.js";
 import type * as crons from "../crons.js";
 import type * as messages from "../messages.js";
 import type * as todos from "../todos.js";
@@ -28,6 +29,7 @@ import type * as todos from "../todos.js";
  */
 declare const fullApi: ApiFromModules<{
   cleanup: typeof cleanup;
+  config: typeof config;
   crons: typeof crons;
   messages: typeof messages;
   todos: typeof todos;

@@ -35,4 +35,12 @@ export const downvote = mutation(async ({ db }, { id }: { id: Id<"todos"> }) => 
   const todo = await db.get(id);
   if (!todo) return;
   await db.patch(id, { downvotes: (todo.downvotes ?? 0) + 1 });
+});
+
+export const deleteAllTodos = mutation(async (ctx) => {
+  const todos = await ctx.db.query("todos").collect();
+  for (const todo of todos) {
+    await ctx.db.delete(todo._id);
+  }
+  return todos.length;
 }); 
