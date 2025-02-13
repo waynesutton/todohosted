@@ -166,7 +166,8 @@ function MainApp() {
       {/* Header */}
       <header className="relative w-full py-6 px-4">
         <div className="max-w-7xl mx-auto flex justify-between items-center font-['Inter']">
-          <h1 className={`${iconClasses} text-xl font-normal flex items-center gap-2`}>
+          <h1
+            className={`${iconClasses} text-xl font-normal flex flex-col md:flex-row items-center gap-2`}>
             <a href="https://convex.link/chatsynclinks" target="_blank" rel="noopener noreferrer">
               <img
                 src={isDark ? "/convex-logo-white.svg" : "/convex-logo-black.svg"}
@@ -174,8 +175,12 @@ function MainApp() {
                 className="h-4"
               />
             </a>
-            <a href="https://convex.link/chatsynclinks" target="_blank" rel="noopener noreferrer">
-              In Sync AI Demo
+            <a
+              href="https://convex.link/chatsynclinks"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm md:text-xl">
+              Sync AI Demo
             </a>
           </h1>
           <div className="flex items-center gap-6">

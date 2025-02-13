@@ -3,20 +3,14 @@ import { ClerkProvider, SignedIn, SignedOut, SignIn, useUser } from "@clerk/cler
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { useNavigate } from "react-router-dom";
+import NotFound from "./NotFound";
 
 const AdminDashboard = () => {
   const { user } = useUser();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    // Only redirect if user is logged in and is not an admin
-    if (user && user.publicMetadata?.role !== "admin") {
-      navigate("/");
-    }
-  }, [user, navigate]);
-
-  // If user is not admin, don't render the dashboard
-  if (user && user.publicMetadata?.role !== "admin") return null;
+  // If user is logged in but not admin, show 404
+  if (user && user.publicMetadata?.role !== "admin") return <NotFound />;
 
   const messages = useQuery(api.messages.get) ?? [];
   const todos = useQuery(api.todos.get) ?? [];
