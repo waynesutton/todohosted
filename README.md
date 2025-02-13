@@ -1,6 +1,6 @@
 # Convex Realtime Chat & Reminders with AI Demo Sync App
 
-An open source chat and reminder application built with Convex, Clerk, and React. This application features real-time chat, task management, and an administrative dashboard for moderation.
+An open source chat and reminder application built with [Convex](https://convex.link/chatsynclinks), Clerk, and React. This application features real-time chat, task management, and an administrative dashboard for moderation.
 
 ![Sync Engine Screenshot](https://syncengine.dev/syncenginescreenshot.png)
 
@@ -48,7 +48,7 @@ An open source chat and reminder application built with Convex, Clerk, and React
 
 - **Backend:**
 
-  - **Database & Functions:** Convex
+  - **Database & Functions:** [Convex](https://convex.link/chatsynclinks)
   - **AI Integration:** OpenAI GPT-4
 
 - **Authentication:**
