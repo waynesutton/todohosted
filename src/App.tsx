@@ -18,9 +18,11 @@ import {
 } from "lucide-react";
 import { useMutation, useQuery, useAction } from "convex/react";
 import { api } from "../convex/_generated/api";
-import ModPage from "./ModPage";
+import ModPage from "./pages/mod";
 import NotFound from "./pages/NotFound";
+import AdminPage from "./pages/admin";
 import type { Id } from "../convex/_generated/dataModel";
+import { useUser, UserButton } from "@clerk/clerk-react";
 
 const HAPPY_EMOJIS = ["😊", "😄", "🎉", "✨", "🌟"];
 
@@ -68,6 +70,7 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<MainApp />} />
+        <Route path="/admin" element={<AdminPage />} />
         <Route path="/mod" element={<ModPage />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
@@ -76,6 +79,7 @@ function App() {
 }
 
 function MainApp() {
+  const { user } = useUser();
   const [isDark, setIsDark] = useState(false);
   const todos = useQuery(api.todos.get) ?? [];
   const messages = useQuery(api.messages.get) ?? [];
@@ -168,7 +172,7 @@ function MainApp() {
         <div className="max-w-7xl mx-auto flex justify-between items-center font-['Inter']">
           <h1
             className={`${iconClasses} text-xl font-normal flex flex-col md:flex-row items-center gap-2`}>
-            <a href="https://convex.link/chatsynclinks" target="_blank" rel="noopener noreferrer">
+            <a href="/" target="_blank" rel="noopener noreferrer">
               <img
                 src={isDark ? "/convex-logo-white.svg" : "/convex-logo-black.svg"}
                 alt="Convex Logo"
@@ -180,7 +184,7 @@ function MainApp() {
               target="_blank"
               rel="noopener noreferrer"
               className="text-sm md:text-xl">
-              Sync AI Demo
+              AI + Sync Chat Demo
             </a>
           </h1>
           <div className="flex items-center gap-6">
@@ -210,6 +214,7 @@ function MainApp() {
               className={`${iconClasses} hover:opacity-80 transition-opacity`}>
               {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
             </button>
+            {user && user.publicMetadata?.role !== "admin" && <UserButton />}
           </div>
         </div>
       </header>

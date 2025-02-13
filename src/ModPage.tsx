@@ -103,7 +103,7 @@ const AdminDashboard = () => {
 const Header = () => (
   <header className="relative w-full py-6 px-4 bg-white border-b">
     <div className="max-w-7xl mx-auto flex justify-between items-center font-['Inter']">
-      <a href="/" className="text-xl font-bold text-gray-900 hover:underline">
+      <a href="/" className="text-xl font-normal text-gray-900 hover:underline">
         Home
       </a>
       <div className="flex items-center gap-6">
