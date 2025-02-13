@@ -2,9 +2,19 @@ import React from "react";
 import { ClerkProvider, SignedIn, SignedOut, SignIn, useUser } from "@clerk/clerk-react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
+import { useNavigate } from "react-router-dom";
 
 const AdminDashboard = () => {
   const { user } = useUser();
+  const navigate = useNavigate();
+
+  // Check for admin role
+  if (!user?.publicMetadata?.role === "admin") {
+    // Redirect non-admins to home page
+    window.location.href = "/";
+    return null;
+  }
+
   // Optional: restrict access further. For example:
   // if (user?.primaryEmailAddress?.emailAddress !== "admin@example.com") return <div>Access Denied</div>;
 
