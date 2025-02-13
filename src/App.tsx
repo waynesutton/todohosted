@@ -238,7 +238,11 @@ function MainApp() {
         <div className="w-full max-w-7xl flex flex-col md:flex-row gap-6 relative items-start mt-8">
           {/* Todo Column */}
           <div className="flex-1">
-            <h2 className={`text-xl font-bold mb-3 tracking-tighter ${iconClasses}`}>Reminders</h2>
+            <h2
+              className={`text-xl font-normal mb-3 tracking-tighter ${iconClasses} flex items-center gap-2`}>
+              Reminders
+              <span className="text-sm">(Public)</span>
+            </h2>
             <div
               className={`${cardClasses} rounded-lg p-4 hover:border-zinc-300 transition-colors`}>
               <form onSubmit={handleSubmitTodo} className="mb-6">
@@ -306,7 +310,11 @@ function MainApp() {
 
           {/* Chat Column */}
           <div className="flex-1">
-            <h2 className={`text-xl font-bold mb-3 tracking-tighter ${iconClasses}`}>Chat</h2>
+            <h2
+              className={`text-xl font-normal mb-3 tracking-tighter ${iconClasses} flex items-center gap-2`}>
+              Chat
+              <span className="text-sm">(Public)</span>
+            </h2>
             <div className={`${cardClasses} rounded-lg p-4 h-[500px] flex flex-col mb-6`}>
               {/* Chat Box */}
               <div className="flex-1 overflow-y-auto mb-4">
