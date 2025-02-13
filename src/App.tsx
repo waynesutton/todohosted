@@ -197,7 +197,7 @@ function MainApp() {
               target="_blank"
               rel="noopener noreferrer"
               className="text-sm md:text-xl">
-              AI + Sync Chat Demo
+              Sync + AI Chat Demo
             </a>
           </h1>
           <div className="flex items-center gap-6">
