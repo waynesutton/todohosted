@@ -9,18 +9,14 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check if user is not admin, redirect to home
+    // Only redirect if user is logged in and is not an admin
     if (user && user.publicMetadata?.role !== "admin") {
       navigate("/");
-      return;
     }
   }, [user, navigate]);
 
-  // If still loading user data, show loading state
-  if (!user) return <div>Loading...</div>;
-
-  // If user is not admin, don't render anything (will be redirected)
-  if (user.publicMetadata?.role !== "admin") return null;
+  // If user is not admin, don't render the dashboard
+  if (user && user.publicMetadata?.role !== "admin") return null;
 
   const messages = useQuery(api.messages.get) ?? [];
   const todos = useQuery(api.todos.get) ?? [];
