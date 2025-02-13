@@ -215,7 +215,7 @@ bun install
    Clerk handles user authentication. The admin dashboard allows moderators to manage content.
 
 7. **Deployment:**  
-   The application uses Convex Cloud for the backend, Netlify for hosting, and integrates with OpenAI's API for AI features.
+   The application uses Convex Cloud for the backend, Netlify for hosting, and integrates with OpenAI's API for AI features
 
 ## Open Source
 
