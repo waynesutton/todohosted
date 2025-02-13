@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { ClerkProvider, SignedIn, SignedOut, SignIn, useUser } from "@clerk/clerk-react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
@@ -8,15 +8,19 @@ const AdminDashboard = () => {
   const { user } = useUser();
   const navigate = useNavigate();
 
-  // Check for admin role
-  if (!user?.publicMetadata?.role === "admin") {
-    // Redirect non-admins to home page
-    window.location.href = "/";
-    return null;
-  }
+  useEffect(() => {
+    // Check if user is not admin, redirect to home
+    if (user && user.publicMetadata?.role !== "admin") {
+      navigate("/");
+      return;
+    }
+  }, [user, navigate]);
 
-  // Optional: restrict access further. For example:
-  // if (user?.primaryEmailAddress?.emailAddress !== "admin@example.com") return <div>Access Denied</div>;
+  // If still loading user data, show loading state
+  if (!user) return <div>Loading...</div>;
+
+  // If user is not admin, don't render anything (will be redirected)
+  if (user.publicMetadata?.role !== "admin") return null;
 
   const messages = useQuery(api.messages.get) ?? [];
   const todos = useQuery(api.todos.get) ?? [];
@@ -24,7 +28,7 @@ const AdminDashboard = () => {
   const deleteAllMessages = useMutation(api.messages.deleteAllMessages);
   const deleteAllTodos = useMutation(api.todos.deleteAllTodos);
   const deleteMessage = useMutation(api.messages.deleteMessage);
-  const deleteTodo = useMutation(api.todos.remove); // Individual deletion for todos already exists
+  const deleteTodo = useMutation(api.todos.remove);
 
   return (
     <div className="p-8 font-sans">
