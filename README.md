@@ -224,3 +224,5 @@ This project is open source. Contributions are welcome! Feel free to open issues
 ## License
 
 This project is licensed under the MIT License.
+
+[![Netlify Status](https://api.netlify.com/api/v1/badges/3ed77b58-4c94-4674-9443-f2ed21fe9669/deploy-status)](https://app.netlify.com/sites/insyc/deploys)

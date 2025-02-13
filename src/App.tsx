@@ -19,6 +19,7 @@ import {
 import { useMutation, useQuery, useAction } from "convex/react";
 import { api } from "../convex/_generated/api";
 import ModPage from "./ModPage";
+import NotFound from "./pages/NotFound";
 import type { Id } from "../convex/_generated/dataModel";
 
 const HAPPY_EMOJIS = ["😊", "😄", "🎉", "✨", "🌟"];
@@ -68,6 +69,7 @@ function App() {
       <Routes>
         <Route path="/" element={<MainApp />} />
         <Route path="/mod" element={<ModPage />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>
   );
