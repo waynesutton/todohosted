@@ -37,15 +37,23 @@ interface MessageItemProps {
   isDark: boolean;
   textClasses: string;
   isSelected: boolean;
+  isThreaded?: boolean;
 }
 
-const MessageItem = ({ message, isDark, textClasses, isSelected }: MessageItemProps) => {
+const MessageItem = ({
+  message,
+  isDark,
+  textClasses,
+  isSelected,
+  isThreaded,
+}: MessageItemProps) => {
   const toggleLike = useMutation(api.messages.toggleLike);
 
   return (
     <div
       className={`${isDark ? "bg-zinc-800/50" : "bg-zinc-100"} 
         ${isSelected ? "ring-2 ring-blue-500" : ""} 
+        ${isThreaded ? "ml-8 border-l-2 border-blue-500 pl-4" : ""}
         rounded-lg p-4 mb-2 animate-glow transition-all`}>
       <div className="flex justify-between items-start">
         <div>
@@ -110,14 +118,8 @@ function MainApp() {
   const initialLoadRef = useRef(true);
 
   useEffect(() => {
-    if (initialLoadRef.current) {
-      initialLoadRef.current = false;
-      return;
-    }
-
-    if (messages.length > 0 && (hasUserInteracted || newMessage))
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, streamedMessage, hasUserInteracted, newMessage]);
+    if (messages.length > 0) messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, streamedMessage]);
 
   useEffect(() => {
     if (newMessage) setHasUserInteracted(true);
@@ -146,6 +148,7 @@ function MainApp() {
 
     if (newMessage.trim().startsWith("@ai")) {
       const prompt = newMessage.slice(3).trim() || "Hello! How can I help you today?";
+      await sendMessage({ text: newMessage.trim(), sender: "User" });
       const messageId = await askAIAction({ prompt });
       setStreamedMessageId(messageId);
       setStreamedMessage("");
@@ -306,6 +309,26 @@ function MainApp() {
                 ))}
               </div>
             </div>
+
+            <h2 className={`text-xl font-normal mb-3 mt-5 tracking-tighter ${iconClasses}`}>
+              Features
+            </h2>
+            <p className="text-sm mt-4">Real-time Chat:</p>
+            <ul className="list-disc pl-5">
+              <li>Send and receive chat messages instantly</li>
+              <li>AI-powered chat responses using "@ai" command</li>
+              <li>Real-time message streaming from OpenAI</li>
+              <li>Create reminders by typing "remind me" in chat</li>
+              <li>Search functionality for messages using vector search</li>
+              <li>Like messages and see like counts</li>
+              <li>Send emoji reactions</li>
+            </ul>
+            <p className="text-sm mt-4">Reminders/Todos:</p>
+            <li>Create and manage public reminders</li>
+            <li>Toggle completion status</li>
+            <li>Upvote and downvote reminders</li>
+            <li>Real-time updates across all connected clients</li>
+            <li>Delete reminders with hover controls</li>
           </div>
 
           {/* Chat Column */}
@@ -320,10 +343,14 @@ function MainApp() {
               <div className="flex-1 overflow-y-auto mb-4">
                 <div className="flex flex-col h-full">
                   <div className="space-y-2 mt-auto">
-                    {messages.map((message) => {
+                    {messages.map((message, index) => {
                       const messageText =
                         streamedMessageId === message._id ? streamedMessage : message.text;
                       const likes = typeof message.likes === "number" ? message.likes : 0;
+                      const isAiResponse =
+                        message.sender === "AI" &&
+                        index > 0 &&
+                        messages[index - 1].text.startsWith("@ai");
 
                       return (
                         <MessageItem
@@ -338,8 +365,9 @@ function MainApp() {
                           isDark={isDark}
                           textClasses={textClasses}
                           isSelected={
-                            searchQuery === "" && selectedMessageIds.includes(message._id)
+                            searchQuery !== "" && selectedMessageIds.includes(message._id)
                           }
+                          isThreaded={isAiResponse}
                         />
                       );
                     })}
@@ -379,7 +407,7 @@ function MainApp() {
             </div>
 
             {/* Search Messages Box */}
-            <h2 className={`text-xl font-bold mb-3 tracking-tighter ${iconClasses}`}>
+            <h2 className={`text-xl font-normal mb-3 tracking-tighter ${iconClasses}`}>
               Search Messages
             </h2>
             <div className={`${cardClasses} rounded-lg p-4 mb-10`}>
@@ -460,7 +488,7 @@ function MainApp() {
       </div>
 
       {/* Footer */}
-      <footer className="relative w-full py-6 px-4 mt-10">
+      <footer className="relative w-full py-6 px-4 mt-1">
         <div className="max-w-7xl mx-auto text-center">
           <p className={`${iconClasses} text-sm mb-2`}>
             All Chats and Reminders are cleared daily via{" "}
