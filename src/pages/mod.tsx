@@ -103,7 +103,7 @@ const AdminDashboard = () => {
 };
 
 const ModPage = () => {
-  const clerkPubKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
+  const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
   if (!clerkPubKey) {
     return <div>Missing Clerk Publishable Key</div>;

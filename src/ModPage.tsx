@@ -108,7 +108,7 @@ const Header = () => (
       </a>
       <div className="flex items-center gap-6">
         <a
-          href="https://convex.dev"
+          href="https://convex.link/chatsync"
           target="_blank"
           rel="noopener noreferrer"
           className="text-sm hover:opacity-80 transition-opacity">
@@ -143,7 +143,7 @@ const Footer = () => (
       <p className="text-sm text-gray-500">
         Built with ❤️ at{" "}
         <a
-          href="https://convex.dev"
+          href="https://convex.link/chatsync"
           target="_blank"
           rel="noopener noreferrer"
           className="hover:opacity-80 transition-opacity">
@@ -151,7 +151,7 @@ const Footer = () => (
         </a>
         . Powered by{" "}
         <a
-          href="https://convex.dev"
+          href="https://convex.link/chatsync"
           target="_blank"
           rel="noopener noreferrer"
           className="hover:opacity-80 transition-opacity">

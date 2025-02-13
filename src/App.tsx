@@ -19,10 +19,24 @@ import {
 import { useMutation, useQuery, useAction } from "convex/react";
 import { api } from "../convex/_generated/api";
 import ModPage from "./ModPage";
+import type { Id } from "../convex/_generated/dataModel";
 
 const HAPPY_EMOJIS = ["😊", "😄", "🎉", "✨", "🌟"];
 
-const MessageItem = ({ message, isDark, textClasses, isSelected }) => {
+interface MessageItemProps {
+  message: {
+    _id: Id<"messages">;
+    sender: string;
+    text: string;
+    likes: number;
+    isComplete?: boolean;
+  };
+  isDark: boolean;
+  textClasses: string;
+  isSelected: boolean;
+}
+
+const MessageItem = ({ message, isDark, textClasses, isSelected }: MessageItemProps) => {
   const toggleLike = useMutation(api.messages.toggleLike);
 
   return (
@@ -40,7 +54,7 @@ const MessageItem = ({ message, isDark, textClasses, isSelected }) => {
         <button
           onClick={() => toggleLike({ id: message._id })}
           className={`${isDark ? "text-zinc-400" : "text-zinc-600"} hover:text-red-500 transition-colors flex items-center gap-1`}>
-          <Heart className={`w-4 h-4 ${message.likes ? "fill-red-500 text-red-500" : ""}`} />
+          <Heart className={`w-4 h-4 ${message.likes > 0 ? "fill-red-500 text-red-500" : ""}`} />
           {message.likes > 0 && <span className="text-sm">{message.likes}</span>}
         </button>
       </div>
@@ -72,6 +86,8 @@ function MainApp() {
 
   const [newTodo, setNewTodo] = useState("");
   const [newMessage, setNewMessage] = useState("");
+  const [streamedMessage, setStreamedMessage] = useState("");
+  const [streamedMessageId, setStreamedMessageId] = useState<Id<"messages"> | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -82,9 +98,19 @@ function MainApp() {
   // Add search function
   const searchMessages = useAction(api.messages.searchMessages);
 
+  const askAIAction = useMutation(api.messages.askAI);
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  useEffect(() => {
+    const message = messages.find((m) => m._id === streamedMessageId);
+    if (message?.isComplete) {
+      setStreamedMessageId(null);
+      setStreamedMessage("");
+    }
+  }, [messages, streamedMessageId]);
 
   const handleSubmitTodo = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -96,10 +122,13 @@ function MainApp() {
   const handleSubmitMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newMessage.trim()) return;
-    await sendMessage({
-      text: newMessage.trim(),
-      sender: "User",
-    });
+
+    if (newMessage.trim().startsWith("@ai")) {
+      const prompt = newMessage.slice(3).trim() || "Hello! How can I help you today?";
+      const messageId = await askAIAction({ prompt });
+      setStreamedMessageId(messageId);
+    } else await sendMessage({ text: newMessage.trim(), sender: "User" });
+
     setNewMessage("");
   };
 
@@ -134,12 +163,12 @@ function MainApp() {
         <div className="max-w-7xl mx-auto flex justify-between items-center font-['Inter']">
           <h1 className={`${iconClasses} text-xl font-bold`}>
             <a href="http://convex.dev" target="_blank" rel="noopener noreferrer">
-              Convex in Sync Demo
+              Convex in Sync AI demo
             </a>
           </h1>
           <div className="flex items-center gap-6">
             <a
-              href="https://convex.dev"
+              href="https://convex.link/chatsync"
               target="_blank"
               rel="noopener noreferrer"
               className={`${iconClasses} hover:opacity-80 transition-opacity`}>
@@ -151,6 +180,13 @@ function MainApp() {
               rel="noopener noreferrer"
               className={`${iconClasses} hover:opacity-80 transition-opacity`}>
               Docs
+            </a>
+            <a
+              href="https://stack.convex.dev/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`${iconClasses} hover:opacity-80 transition-opacity`}>
+              Blog
             </a>
             <button
               onClick={() => setIsDark(!isDark)}
@@ -207,17 +243,19 @@ function MainApp() {
                         onClick={() => upvote({ id: todo._id })}
                         className={`${iconClasses} hover:text-green-500 transition-colors flex items-center gap-1`}>
                         <ThumbsUp
-                          className={`w-4 h-4 ${todo.upvotes ? "fill-green-500 text-green-500" : ""}`}
+                          className={`w-4 h-4 ${(todo.upvotes ?? 0) > 0 ? "fill-green-500 text-green-500" : ""}`}
                         />
-                        {todo.upvotes > 0 && <span className="text-sm">{todo.upvotes}</span>}
+                        {(todo.upvotes ?? 0) > 0 && <span className="text-sm">{todo.upvotes}</span>}
                       </button>
                       <button
                         onClick={() => downvote({ id: todo._id })}
                         className={`${iconClasses} hover:text-red-500 transition-colors flex items-center gap-1`}>
                         <ThumbsDown
-                          className={`w-4 h-4 ${todo.downvotes ? "fill-red-500 text-red-500" : ""}`}
+                          className={`w-4 h-4 ${(todo.downvotes ?? 0) > 0 ? "fill-red-500 text-red-500" : ""}`}
                         />
-                        {todo.downvotes > 0 && <span className="text-sm">{todo.downvotes}</span>}
+                        {(todo.downvotes ?? 0) > 0 && (
+                          <span className="text-sm">{todo.downvotes}</span>
+                        )}
                       </button>
                       <button
                         onClick={() => deleteTodo({ id: todo._id })}
@@ -239,15 +277,29 @@ function MainApp() {
               <div className="flex-1 overflow-y-auto mb-4">
                 <div className="flex flex-col h-full">
                   <div className="space-y-2 mt-auto">
-                    {messages.map((message) => (
-                      <MessageItem
-                        key={message._id}
-                        message={message}
-                        isDark={isDark}
-                        textClasses={textClasses}
-                        isSelected={searchQuery === "" && selectedMessageIds.includes(message._id)}
-                      />
-                    ))}
+                    {messages.map((message) => {
+                      const messageText =
+                        streamedMessageId === message._id ? streamedMessage : message.text;
+                      const likes = typeof message.likes === "number" ? message.likes : 0;
+
+                      return (
+                        <MessageItem
+                          key={message._id}
+                          message={{
+                            _id: message._id,
+                            sender: message.sender,
+                            text: messageText,
+                            likes,
+                            isComplete: message.isComplete,
+                          }}
+                          isDark={isDark}
+                          textClasses={textClasses}
+                          isSelected={
+                            searchQuery === "" && selectedMessageIds.includes(message._id)
+                          }
+                        />
+                      );
+                    })}
                     <div ref={messagesEndRef} />
                   </div>
                 </div>
@@ -267,6 +319,12 @@ function MainApp() {
                     onClick={sendEmoji}
                     className={`${isDark ? "text-zinc-400" : "text-zinc-600"} hover:text-yellow-500 transition-colors`}>
                     <Smile className="w-4 h-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setNewMessage("@ai")}
+                    className={`${isDark ? "text-zinc-400" : "text-zinc-600"} hover:text-blue-500 transition-colors`}>
+                    Ask AI
                   </button>
                   <button
                     type="submit"
@@ -348,11 +406,11 @@ function MainApp() {
       {/* Convex Logo Section */}
       <div className="flex justify-center my-8">
         {isDark ? (
-          <a href="https://convex.dev" target="_blank" rel="noopener noreferrer">
+          <a href="https://convex.link/chatsync" target="_blank" rel="noopener noreferrer">
             <img src="/convex-white.svg" alt="Convex Logo" className="h-12" />
           </a>
         ) : (
-          <a href="https://convex.dev" target="_blank" rel="noopener noreferrer">
+          <a href="https://convex.link/chatsync" target="_blank" rel="noopener noreferrer">
             <img src="/convex-black.svg" alt="Convex Logo" className="h-12" />
           </a>
         )}
@@ -374,7 +432,7 @@ function MainApp() {
           <p className={`${iconClasses} text-sm`}>
             Built with ❤️ at{" "}
             <a
-              href="https://convex.dev"
+              href="https://convex.link/chatsync"
               target="_blank"
               rel="noopener noreferrer"
               className="hover:opacity-80 transition-opacity">
@@ -382,7 +440,7 @@ function MainApp() {
             </a>
             . Powered by{" "}
             <a
-              href="https://convex.dev"
+              href="https://convex.link/chatsync"
               target="_blank"
               rel="noopener noreferrer"
               className="hover:opacity-80 transition-opacity">
