@@ -2,27 +2,39 @@
 
 An open source chat and reminder application built with Convex, Clerk, and React. This application features real-time chat, task management, and an administrative dashboard for moderation.
 
+![Sync Engine Screenshot](https://syncengine.dev/syncenginescreenshot.png)
+
 ## Features
 
 - **Real-time Chat:**
+
   - Send and receive chat messages instantly
   - AI-powered chat responses using "@ai" command
   - Real-time message streaming from OpenAI
+  - Create reminders by typing "remind me" in chat
   - Search functionality for messages using vector search
+  - Like messages and see like counts
+  - Send emoji reactions
+
 - **Reminders/Todos:**
 
-  - Create and manage reminders (todos)
-  - Toggle completion status and vote on reminders
+  - Create and manage public reminders
+  - Toggle completion status
+  - Upvote and downvote reminders
   - Real-time updates across all connected clients
+  - Delete reminders with hover controls
 
 - **Admin Dashboard:**
 
-  - Moderation dashboard available at `/mod`
-  - Sign in using Clerk to manage your profile and sign out
-  - View and delete individual or all chat messages and reminders
+  - Moderation dashboard at `/mod`
+  - Sign in using Clerk to manage your profile
+  - View and delete individual or all chat messages
+  - Manage all reminders from one place
 
-- **Authentication:**
-  - User sign-in and profile management provided by Clerk
+- **Dark/Light Mode:**
+  - Toggle between dark and light themes
+  - Persists across sessions
+  - Beautiful UI transitions
 
 ## Stack
 
@@ -178,44 +190,47 @@ bun install
 
 ## How It Works
 
-1. **Real-time Data Sync with Convex:**
+1. **Real-time Data Sync:**
 
-   - All data is automatically synchronized across clients using Convex's real-time subscriptions
-   - Messages and todos are instantly updated without page refreshes
-   - Vector search indexes enable efficient message searching
-   - Optimistic updates provide instant UI feedback
+   - Messages and reminders sync instantly using Convex's real-time subscriptions
+   - No page refreshes needed - everything updates live
+   - Vector search enables fast message searching
+   - Optimistic updates for instant UI feedback
 
-2. **AI Integration:**
+2. **Chat Features:**
 
-   - Type "@ai" in the chat to trigger AI responses
-   - Messages are streamed in real-time from OpenAI's GPT-4
-   - AI responses are processed through Convex's streaming actions
-   - Vector embeddings are generated for efficient message searching
+   - Type "@ai" to get AI responses streamed in real-time
+   - Type "remind me" to create a new reminder
+   - Click heart icon to like messages
+   - Use emoji button for quick reactions
+   - Search through message history instantly
 
-3. **Data Flow:**
+3. **Reminder System:**
 
-   ```
-   Client Action -> Convex Mutation -> Database Update -> Real-time Updates to All Clients
-                                  -> AI Action (if @ai) -> Stream Response -> Real-time Updates
-   ```
+   - Create reminders directly or via chat
+   - Check/uncheck to toggle completion
+   - Upvote/downvote to rate importance
+   - Hover to reveal delete option
+   - All changes sync in real-time
 
-4. **Message Processing:**
+4. **Admin Controls:**
 
-   - Regular messages are stored with vector embeddings for search
-   - AI messages are processed in chunks and streamed to clients
-   - All messages support real-time likes and moderation
+   - Secure admin access via Clerk auth
+   - Bulk or individual message deletion
+   - Reminder management interface
+   - Real-time moderation updates
 
-5. **Search Functionality:**
+5. **Search System:**
 
-   - Messages are indexed using Convex's vector search
-   - Search results update in real-time as you type
-   - Results are ranked by relevance using vector similarity
+   - Real-time search as you type
+   - Vector-based semantic search
+   - Results ranked by relevance
+   - Highlights matching messages
 
-6. **Authentication & Admin:**  
-   Clerk handles user authentication. The admin dashboard allows moderators to manage content.
-
-7. **Deployment:**  
-   The application uses Convex Cloud for the backend, Netlify for hosting, and integrates with OpenAI's API for AI features
+6. **Authentication:**
+   - Clerk handles user management
+   - Role-based access control
+   - Secure admin dashboard
 
 ## Open Source
 
