@@ -89,6 +89,7 @@ function App() {
 function MainApp() {
   const { user } = useUser();
   const [isDark, setIsDark] = useState(false);
+  const [showFloatingBox, setShowFloatingBox] = useState(true);
   const todos = useQuery(api.todos.get) ?? [];
   const messages = useQuery(api.messages.get) ?? [];
   const addTodo = useMutation(api.todos.add);
@@ -474,7 +475,7 @@ function MainApp() {
         </div>
       </main>
 
-      {/* Convex Logo Section */}
+      {/* Convex Logo Section 
       <div className="flex justify-center my-8">
         {isDark ? (
           <a href="https://convex.link/chatsynclinks" target="_blank" rel="noopener noreferrer">
@@ -485,7 +486,22 @@ function MainApp() {
             <img src="/convex-black.svg" alt="Convex Logo" className="h-12" />
           </a>
         )}
-      </div>
+      </div>*/}
+
+      {/* Floating Box */}
+      {showFloatingBox && (
+        <a href="https://convex.link/chatsynclinks" target="_blank" rel="noopener noreferrer">
+          <div className="fixed bottom-4 right-4 bg-black text-white p-4 rounded-lg shadow-lg flex items-center gap-3 z-50">
+            <span>Powered by</span>
+            <img src="/convex-logo-white.svg" alt="Convex Logo" className="h-4" />
+            <button
+              onClick={() => setShowFloatingBox(false)}
+              className="ml-2 hover:text-gray-300 transition-colors">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </a>
+      )}
 
       {/* Footer */}
       <footer className="relative w-full py-6 px-4 mt-1">
