@@ -104,13 +104,15 @@ function MainApp() {
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [messages, streamedMessage]);
 
   useEffect(() => {
     const message = messages.find((m) => m._id === streamedMessageId);
     if (message?.isComplete) {
       setStreamedMessageId(null);
       setStreamedMessage("");
+    } else if (message && message.text !== streamedMessage) {
+      setStreamedMessage(message.text);
     }
   }, [messages, streamedMessageId]);
 
@@ -129,6 +131,7 @@ function MainApp() {
       const prompt = newMessage.slice(3).trim() || "Hello! How can I help you today?";
       const messageId = await askAIAction({ prompt });
       setStreamedMessageId(messageId);
+      setStreamedMessage("");
     } else await sendMessage({ text: newMessage.trim(), sender: "User" });
 
     setNewMessage("");
