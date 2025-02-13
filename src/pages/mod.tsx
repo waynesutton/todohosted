@@ -156,7 +156,7 @@ const AdminDashboard = () => {
             </a>
           </p>
           <p className="text-sm text-gray-600">
-            Built with ❤️ at{" "}
+            Open Source and built with with ❤️ at{" "}
             <a
               href="https://convex.link/chatsynclinks"
               target="_blank"

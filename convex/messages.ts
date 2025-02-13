@@ -265,3 +265,32 @@ export const streamResponse = action({
     return null;
   },
 });
+
+export const sendMessage = mutation({
+  args: {
+    text: v.string(),
+    sender: v.string(),
+  },
+  handler: async (ctx, args) => {
+    // Check if message is a reminder
+    if (args.text.toLowerCase().startsWith("remind me")) {
+      const reminderText = args.text.slice("remind me".length).trim();
+      // Create todo
+      await ctx.db.insert("todos", {
+        text: reminderText,
+        completed: false,
+        upvotes: 0,
+        downvotes: 0,
+      });
+    }
+
+    // Still save the original message
+    await ctx.db.insert("messages", {
+      text: args.text,
+      sender: args.sender,
+      timestamp: Date.now(),
+      likes: 0,
+      textVector: textToVector(args.text),
+    });
+  },
+});

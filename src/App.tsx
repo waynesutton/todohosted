@@ -86,7 +86,7 @@ function MainApp() {
   const addTodo = useMutation(api.todos.add);
   const toggleTodo = useMutation(api.todos.toggle);
   const deleteTodo = useMutation(api.todos.remove);
-  const sendMessage = useMutation(api.messages.send);
+  const sendMessage = useMutation(api.messages.sendMessage);
   const upvote = useMutation(api.todos.upvote);
   const downvote = useMutation(api.todos.downvote);
 
@@ -106,9 +106,22 @@ function MainApp() {
 
   const askAIAction = useMutation(api.messages.askAI);
 
+  const [hasUserInteracted, setHasUserInteracted] = useState(false);
+  const initialLoadRef = useRef(true);
+
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, streamedMessage]);
+    if (initialLoadRef.current) {
+      initialLoadRef.current = false;
+      return;
+    }
+
+    if (messages.length > 0 && (hasUserInteracted || newMessage))
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, streamedMessage, hasUserInteracted, newMessage]);
+
+  useEffect(() => {
+    if (newMessage) setHasUserInteracted(true);
+  }, [newMessage]);
 
   useEffect(() => {
     const message = messages.find((m) => m._id === streamedMessageId);
@@ -333,7 +346,7 @@ function MainApp() {
                     type="text"
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
-                    placeholder="Type a message..."
+                    placeholder="Type a message or @ai or remind me ..."
                     className={`bg-transparent flex-1 outline-none ${textClasses} placeholder-zinc-500`}
                   />
                   <button
@@ -357,11 +370,11 @@ function MainApp() {
               </form>
             </div>
 
-            {/* Separately styled Search Messages Box */}
+            {/* Search Messages Box */}
             <h2 className={`text-xl font-bold mb-3 tracking-tighter ${iconClasses}`}>
               Search Messages
             </h2>
-            <div className={`${cardClasses} rounded-lg p-4`}>
+            <div className={`${cardClasses} rounded-lg p-4 mb-10`}>
               <div
                 className={`${isDark ? "bg-zinc-800" : "bg-zinc-100"} rounded-lg p-4 flex items-center gap-4`}>
                 <Search className="w-4 h-4 text-zinc-400" />
@@ -439,7 +452,7 @@ function MainApp() {
       </div>
 
       {/* Footer */}
-      <footer className="relative w-full py-6 px-4 mt-[0px]">
+      <footer className="relative w-full py-6 px-4 mt-10">
         <div className="max-w-7xl mx-auto text-center">
           <p className={`${iconClasses} text-sm mb-2`}>
             All Chats and Reminders are cleared daily via{" "}
@@ -452,7 +465,7 @@ function MainApp() {
             </a>
           </p>
           <p className={`${iconClasses} text-sm`}>
-            Built with ❤️ at{" "}
+            Open Source and built with ❤️ at{" "}
             <a
               href="https://convex.link/chatsynclinks"
               target="_blank"
