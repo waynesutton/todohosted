@@ -161,14 +161,27 @@ function MainApp() {
       {/* Header */}
       <header className="relative w-full py-6 px-4">
         <div className="max-w-7xl mx-auto flex justify-between items-center font-['Inter']">
-          <h1 className={`${iconClasses} text-xl font-bold`}>
-            <a href="http://convex.dev" target="_blank" rel="noopener noreferrer">
-              Convex in Sync AI demo
+          <h1 className={`${iconClasses} text-xl font-normal flex items-center gap-2`}>
+            <a
+              href="https://convex.link/chatsynclinkslinks"
+              target="_blank"
+              rel="noopener noreferrer">
+              <img
+                src={isDark ? "/convex-logo-white.svg" : "/convex-logo-black.svg"}
+                alt="Convex Logo"
+                className="h-4"
+              />
+            </a>
+            <a
+              href="https://convex.link/chatsynclinkslinks"
+              target="_blank"
+              rel="noopener noreferrer">
+              In Sync AI Demo
             </a>
           </h1>
           <div className="flex items-center gap-6">
             <a
-              href="https://convex.link/chatsync"
+              href="https://convex.link/chatsynclinks"
               target="_blank"
               rel="noopener noreferrer"
               className={`${iconClasses} hover:opacity-80 transition-opacity`}>
@@ -406,11 +419,11 @@ function MainApp() {
       {/* Convex Logo Section */}
       <div className="flex justify-center my-8">
         {isDark ? (
-          <a href="https://convex.link/chatsync" target="_blank" rel="noopener noreferrer">
+          <a href="https://convex.link/chatsynclinks" target="_blank" rel="noopener noreferrer">
             <img src="/convex-white.svg" alt="Convex Logo" className="h-12" />
           </a>
         ) : (
-          <a href="https://convex.link/chatsync" target="_blank" rel="noopener noreferrer">
+          <a href="https://convex.link/chatsynclinks" target="_blank" rel="noopener noreferrer">
             <img src="/convex-black.svg" alt="Convex Logo" className="h-12" />
           </a>
         )}
@@ -432,7 +445,7 @@ function MainApp() {
           <p className={`${iconClasses} text-sm`}>
             Built with ❤️ at{" "}
             <a
-              href="https://convex.link/chatsync"
+              href="https://convex.link/chatsynclinks"
               target="_blank"
               rel="noopener noreferrer"
               className="hover:opacity-80 transition-opacity">
@@ -440,7 +453,7 @@ function MainApp() {
             </a>
             . Powered by{" "}
             <a
-              href="https://convex.link/chatsync"
+              href="https://convex.link/chatsynclinks"
               target="_blank"
               rel="noopener noreferrer"
               className="hover:opacity-80 transition-opacity">
