@@ -196,6 +196,7 @@ bun install
    - No page refreshes needed - everything updates live
    - Vector search enables fast message searching
    - Optimistic updates for instant UI feedback
+   - Daily cleanup at 1:00 AM PT (8:00 AM UTC)
 
 2. **Chat Features:**
 
