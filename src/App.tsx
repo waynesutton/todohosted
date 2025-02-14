@@ -90,6 +90,7 @@ function MainApp() {
   const { user } = useUser();
   const [isDark, setIsDark] = useState(false);
   const [showFloatingBox, setShowFloatingBox] = useState(true);
+  const [showFeaturesModal, setShowFeaturesModal] = useState(false);
   const todos = useQuery(api.todos.get) ?? [];
   const messages = useQuery(api.messages.get) ?? [];
   const addTodo = useMutation(api.todos.add);
@@ -212,6 +213,11 @@ function MainApp() {
               className={`${iconClasses} hover:opacity-80 transition-opacity`}>
               Convex
             </a>
+            <button
+              onClick={() => setShowFeaturesModal(true)}
+              className={`${iconClasses} hover:opacity-80 transition-opacity`}>
+              Features
+            </button>
             <a
               href="https://docs.convex.dev"
               target="_blank"
@@ -310,28 +316,47 @@ function MainApp() {
                 ))}
               </div>
             </div>
-
-            <h2 className={`text-lg font-normal mb-3 mt-5 tracking-tighter ${iconClasses}`}>
-              Features
-            </h2>
-            <p className="text-sm mt-4">Real-time Chat:</p>
-            <ul className="list-disc pl-5">
-              <li>Send and receive chat messages instantly</li>
-              <li className="text-sm">AI-powered chat responses using "@ai" command</li>
-              <li className="text-sm">Real-time message streaming from OpenAI</li>
-              <li className="text-sm">Create reminders by typing "remind me" in chat</li>
-              <li className="text-sm">Search functionality for messages using vector search</li>
-              <li className="text-sm">Like messages and see like counts</li>
-              <li className="text-sm">Send emoji reactions</li>
-            </ul>
-            <div className="mb-10" />
-            <p className="text-sm">Reminders/Todos:</p>
-            <li className="text-sm">Create and manage public reminders</li>
-            <li className="text-sm">Toggle completion status</li>
-            <li className="text-sm">Upvote and downvote reminders</li>
-            <li className="text-sm">Real-time updates across all connected clients</li>
-            <li className="text-sm">Delete reminders with hover controls</li>
           </div>
+
+          {/* Features Modal */}
+          {showFeaturesModal && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className={`${cardClasses} max-w-2xl w-full mx-4 p-6 rounded-lg`}>
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className={`text-xl font-normal tracking-tighter ${iconClasses}`}>
+                    Features
+                  </h2>
+                  <button
+                    onClick={() => setShowFeaturesModal(false)}
+                    className={`${iconClasses} hover:text-gray-300 transition-colors`}>
+                    <X className="w-6 h-6" />
+                  </button>
+                </div>
+                <div className={`${textClasses}`}>
+                  <p className="text-sm font-medium mb-2">Real-time Chat:</p>
+                  <ul className="list-disc pl-5 mb-4">
+                    <li className="text-sm">Send and receive chat messages instantly</li>
+                    <li className="text-sm">AI-powered chat responses using "@ai" command</li>
+                    <li className="text-sm">Real-time message streaming from OpenAI</li>
+                    <li className="text-sm">Create reminders by typing "remind me" in chat</li>
+                    <li className="text-sm">
+                      Search functionality for messages using vector search
+                    </li>
+                    <li className="text-sm">Like messages and see like counts</li>
+                    <li className="text-sm">Send emoji reactions</li>
+                  </ul>
+                  <p className="text-sm font-medium mb-2">Reminders/Todos:</p>
+                  <ul className="list-disc pl-5">
+                    <li className="text-sm">Create and manage public reminders</li>
+                    <li className="text-sm">Toggle completion status</li>
+                    <li className="text-sm">Upvote and downvote reminders</li>
+                    <li className="text-sm">Real-time updates across all connected clients</li>
+                    <li className="text-sm">Delete reminders with hover controls</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Chat Column */}
           <div className="flex-1">
