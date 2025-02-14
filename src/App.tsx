@@ -491,7 +491,7 @@ function MainApp() {
       {/* Floating Box */}
       {showFloatingBox && (
         <a href="https://convex.link/chatsynclinks" target="_blank" rel="noopener noreferrer">
-          <div className="fixed bottom-4 right-4 bg-black text-white p-4 rounded-lg shadow-lg flex items-center gap-3 z-50">
+          <div className="fixed bottom-4 right-4 bg-black text-white p-2 rounded-lg shadow-lg flex items-center gap-3 z-50">
             <span>Powered by</span>
             <img src="/convex-logo-white.svg" alt="Convex Logo" className="h-4" />
             <button
