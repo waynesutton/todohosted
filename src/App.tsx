@@ -311,25 +311,26 @@ function MainApp() {
               </div>
             </div>
 
-            <h2 className={`text-xl font-normal mb-3 mt-5 tracking-tighter ${iconClasses}`}>
+            <h2 className={`text-lg font-normal mb-3 mt-5 tracking-tighter ${iconClasses}`}>
               Features
             </h2>
             <p className="text-sm mt-4">Real-time Chat:</p>
             <ul className="list-disc pl-5">
               <li>Send and receive chat messages instantly</li>
-              <li>AI-powered chat responses using "@ai" command</li>
-              <li>Real-time message streaming from OpenAI</li>
-              <li>Create reminders by typing "remind me" in chat</li>
-              <li>Search functionality for messages using vector search</li>
-              <li>Like messages and see like counts</li>
-              <li>Send emoji reactions</li>
+              <li className="text-sm">AI-powered chat responses using "@ai" command</li>
+              <li className="text-sm">Real-time message streaming from OpenAI</li>
+              <li className="text-sm">Create reminders by typing "remind me" in chat</li>
+              <li className="text-sm">Search functionality for messages using vector search</li>
+              <li className="text-sm">Like messages and see like counts</li>
+              <li className="text-sm">Send emoji reactions</li>
             </ul>
-            <p className="text-sm mt-4">Reminders/Todos:</p>
-            <li>Create and manage public reminders</li>
-            <li>Toggle completion status</li>
-            <li>Upvote and downvote reminders</li>
-            <li>Real-time updates across all connected clients</li>
-            <li>Delete reminders with hover controls</li>
+            <div className="mb-10" />
+            <p className="text-sm">Reminders/Todos:</p>
+            <li className="text-sm">Create and manage public reminders</li>
+            <li className="text-sm">Toggle completion status</li>
+            <li className="text-sm">Upvote and downvote reminders</li>
+            <li className="text-sm">Real-time updates across all connected clients</li>
+            <li className="text-sm">Delete reminders with hover controls</li>
           </div>
 
           {/* Chat Column */}
