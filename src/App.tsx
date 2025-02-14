@@ -213,11 +213,7 @@ function MainApp() {
               className={`${iconClasses} hover:opacity-80 transition-opacity`}>
               Convex
             </a>
-            <button
-              onClick={() => setShowFeaturesModal(true)}
-              className={`${iconClasses} hover:opacity-80 transition-opacity`}>
-              Features
-            </button>
+
             <a
               href="https://docs.convex.dev"
               target="_blank"
@@ -232,6 +228,11 @@ function MainApp() {
               className={`${iconClasses} hover:opacity-80 transition-opacity`}>
               Blog
             </a>
+            <button
+              onClick={() => setShowFeaturesModal(true)}
+              className={`${iconClasses} hover:opacity-80 transition-opacity`}>
+              About
+            </button>
             <button
               onClick={() => setIsDark(!isDark)}
               className={`${iconClasses} hover:opacity-80 transition-opacity`}>
@@ -324,7 +325,7 @@ function MainApp() {
               <div className={`${cardClasses} max-w-2xl w-full mx-4 p-6 rounded-lg`}>
                 <div className="flex justify-between items-center mb-4">
                   <h2 className={`text-xl font-normal tracking-tighter ${iconClasses}`}>
-                    Features
+                    Demo Features
                   </h2>
                   <button
                     onClick={() => setShowFeaturesModal(false)}
