@@ -63,7 +63,7 @@ const AdminDashboard = () => {
         <div className="max-w-4xl mx-auto">
           <div className="flex justify-between items-center mb-8">
             <h1 className="text-3xl font-normal">Admin Dashboard</h1>
-            <div className="text-sm text-gray-600">{user?.emailAddresses[0]?.emailAddress}</div>
+            {/* <div className="text-sm text-gray-600">{user?.emailAddresses[0]?.emailAddress}</div> */}
           </div>
 
           <section className="mb-8">
