@@ -15,56 +15,102 @@ function textToVector(text: string): number[] {
   return vector.map((val) => val / 1000);
 }
 
-export const get = query(async (ctx) => {
-  return await ctx.db.query("messages").order("asc").collect();
+export const get = query({
+  args: {},
+  returns: v.array(
+    v.object({
+      _id: v.id("messages"),
+      _creationTime: v.number(),
+      text: v.string(),
+      content: v.optional(v.string()),
+      sender: v.optional(v.string()),
+      timestamp: v.optional(v.number()),
+      likes: v.optional(v.number()),
+      textVector: v.optional(v.array(v.number())),
+      isComplete: v.optional(v.boolean()),
+    })
+  ),
+  handler: async (ctx) => await ctx.db.query("messages").order("asc").collect(),
 });
 
-export const send = mutation(async (ctx, { text, sender }: { text: string; sender: string }) => {
-  // Generate vector for the new message
-  const vector = textToVector(text);
-  console.log("New message:", text);
-  console.log("Generated vector:", vector);
+export const send = mutation({
+  args: {
+    text: v.string(),
+    sender: v.string(),
+  },
+  returns: v.id("messages"),
+  handler: async (ctx, { text, sender }) => {
+    const vector = textToVector(text);
+    console.log("New message:", text);
+    console.log("Generated vector:", vector);
 
-  // Insert message with vector
-  const messageId = await ctx.db.insert("messages", {
-    text,
-    sender,
-    timestamp: Date.now(),
-    likes: 0,
-    textVector: vector,
-  });
-
-  return messageId;
+    return await ctx.db.insert("messages", {
+      text,
+      content: text,
+      sender,
+      timestamp: Date.now(),
+      likes: 0,
+      textVector: vector,
+    });
+  },
 });
 
-export const toggleLike = mutation(async (ctx, { id }: { id: Id<"messages"> }) => {
-  const message = await ctx.db.get(id);
-  if (!message) return;
+export const toggleLike = mutation({
+  args: {
+    id: v.id("messages"),
+  },
+  returns: v.null(),
+  handler: async (ctx, { id }) => {
+    const message = await ctx.db.get(id);
+    if (!message) return null;
 
-  const currentLikes = message.likes ?? 0;
-  await ctx.db.patch(id, { likes: currentLikes + 1 });
+    const currentLikes = message.likes ?? 0;
+    await ctx.db.patch(id, { likes: currentLikes + 1 });
+    return null;
+  },
 });
 
-// Add a helper query for checking messages
-export const getMessagesStatus = query(async (ctx) => {
-  const messages = await ctx.db.query("messages").collect();
-  return {
-    messages,
-    total: messages.length,
-    withVectors: messages.filter((m) => m.textVector).length,
-  };
+export const getMessagesStatus = query({
+  args: {},
+  returns: v.object({
+    messages: v.array(
+      v.object({
+        _id: v.id("messages"),
+        _creationTime: v.number(),
+        text: v.string(),
+        content: v.optional(v.string()),
+        sender: v.optional(v.string()),
+        timestamp: v.optional(v.number()),
+        likes: v.optional(v.number()),
+        textVector: v.optional(v.array(v.number())),
+        isComplete: v.optional(v.boolean()),
+      })
+    ),
+    total: v.number(),
+    withVectors: v.number(),
+  }),
+  handler: async (ctx) => {
+    const messages = await ctx.db.query("messages").collect();
+    return {
+      messages,
+      total: messages.length,
+      withVectors: messages.filter((m) => m.textVector).length,
+    };
+  },
 });
 
-// Fix the search function
 export const searchMessages = action({
   args: {
     query: v.string(),
+    pageId: v.id("pages"),
   },
-  returns: v.array(v.id("messages")),
-  handler: async (ctx, { query }) => {
+  returns: v.array(v.id("pageMessages")),
+  handler: async (ctx: ActionCtx, { query, pageId }): Promise<Id<"pageMessages">[]> => {
     try {
-      const results: Doc<"messages">[] = await ctx.runQuery(api.messages.searchExact, { query });
-      return results.map((r) => r._id);
+      const results = await ctx.runQuery(api.pageMessages.getMessages, { pageId });
+      return results
+        .filter((m) => m.text.toLowerCase().includes(query.toLowerCase()))
+        .map((r) => r._id);
     } catch (error) {
       console.error("Search error:", error);
       return [];
@@ -81,58 +127,78 @@ export const searchExact = query({
       _id: v.id("messages"),
       _creationTime: v.number(),
       text: v.string(),
-      sender: v.string(),
-      timestamp: v.number(),
+      content: v.optional(v.string()),
+      sender: v.optional(v.string()),
+      timestamp: v.optional(v.number()),
       likes: v.optional(v.number()),
       textVector: v.optional(v.array(v.number())),
       isComplete: v.optional(v.boolean()),
     })
   ),
-  handler: async (ctx, { query }) => {
-    return await ctx.db
+  handler: async (ctx, { query }) =>
+    await ctx.db
       .query("messages")
       .withSearchIndex("search_text", (q) => q.search("text", query))
-      .take(5);
+      .take(5),
+});
+
+export const backfillVectors = mutation({
+  args: {},
+  returns: v.number(),
+  handler: async (ctx) => {
+    const messages = await ctx.db
+      .query("messages")
+      .filter((q) => q.eq(q.field("textVector"), undefined))
+      .collect();
+
+    for (const message of messages) {
+      if (message.text) {
+        const vector = textToVector(message.text);
+        await ctx.db.patch(message._id, { textVector: vector });
+      }
+    }
+
+    return messages.length;
   },
 });
 
-// Add backfill function
-export const backfillVectors = mutation(async (ctx) => {
-  // Get all messages without vectors
-  const messages = await ctx.db
-    .query("messages")
-    .filter((q) => q.eq(q.field("textVector"), undefined))
-    .collect();
-
-  // Add vectors to each message
-  for (const message of messages) {
-    const vector = textToVector(message.text);
-    await ctx.db.patch(message._id, { textVector: vector });
-  }
-
-  return messages.length;
+export const checkVectors = query({
+  args: {},
+  returns: v.object({
+    total: v.number(),
+    withVectors: v.number(),
+    withoutVectors: v.number(),
+  }),
+  handler: async (ctx) => {
+    const messages = await ctx.db.query("messages").collect();
+    return {
+      total: messages.length,
+      withVectors: messages.filter((m) => m.textVector).length,
+      withoutVectors: messages.filter((m) => !m.textVector).length,
+    };
+  },
 });
 
-// Add a query to check vector status
-export const checkVectors = query(async (ctx) => {
-  const messages = await ctx.db.query("messages").collect();
-  return {
-    total: messages.length,
-    withVectors: messages.filter((m) => m.textVector).length,
-    withoutVectors: messages.filter((m) => !m.textVector).length,
-  };
+export const deleteAllMessages = mutation({
+  args: {},
+  returns: v.number(),
+  handler: async (ctx) => {
+    const messages = await ctx.db.query("messages").collect();
+    for (const message of messages) await ctx.db.delete(message._id);
+
+    return messages.length;
+  },
 });
 
-export const deleteAllMessages = mutation(async (ctx) => {
-  const messages = await ctx.db.query("messages").collect();
-  for (const message of messages) {
-    await ctx.db.delete(message._id);
-  }
-  return messages.length;
-});
-
-export const deleteMessage = mutation(async (ctx, { id }: { id: Id<"messages"> }) => {
-  await ctx.db.delete(id);
+export const deleteMessage = mutation({
+  args: {
+    id: v.id("messages"),
+  },
+  returns: v.null(),
+  handler: async (ctx, { id }) => {
+    await ctx.db.delete(id);
+    return null;
+  },
 });
 
 export const patchMessage = mutation({
@@ -140,6 +206,7 @@ export const patchMessage = mutation({
     id: v.id("messages"),
     patch: v.object({
       text: v.optional(v.string()),
+      content: v.optional(v.string()),
       textVector: v.optional(v.array(v.number())),
       isComplete: v.optional(v.boolean()),
     }),
@@ -151,25 +218,26 @@ export const patchMessage = mutation({
   },
 });
 
-// Added askAI action for Streaming Chat Completions With HTTP Actions
 export const askAI = mutation({
-  args: { prompt: v.string() },
-  returns: v.id("messages"),
-  handler: async (ctx, { prompt }) => {
-    // Create a placeholder message
-    const messageId = await ctx.db.insert("messages", {
+  args: {
+    prompt: v.string(),
+    pageId: v.id("pages"),
+  },
+  returns: v.id("pageMessages"),
+  handler: async (ctx, { prompt, pageId }) => {
+    const messageId = await ctx.db.insert("pageMessages", {
+      pageId,
       text: "",
       sender: "AI",
       timestamp: Date.now(),
       likes: 0,
-      textVector: [],
       isComplete: false,
     });
 
-    // Schedule streaming in the background
     await ctx.scheduler.runAfter(0, api.messages.streamResponse, {
       messageId,
       prompt,
+      pageId,
     });
 
     return messageId;
@@ -178,12 +246,13 @@ export const askAI = mutation({
 
 export const streamResponse = action({
   args: {
-    messageId: v.id("messages"),
+    messageId: v.id("pageMessages"),
     prompt: v.string(),
+    pageId: v.id("pages"),
   },
   returns: v.null(),
   handler: async (ctx: ActionCtx, args) => {
-    const { messageId, prompt } = args;
+    const { messageId, prompt, pageId } = args;
     try {
       const response = await fetch("https://api.openai.com/v1/chat/completions", {
         method: "POST",
@@ -210,7 +279,6 @@ export const streamResponse = action({
         const { done, value } = await reader.read();
         if (done) break;
 
-        // Decode the chunk and update the message
         const chunk = decoder.decode(value);
         const lines = chunk.split("\n");
 
@@ -224,10 +292,11 @@ export const streamResponse = action({
               const content = json.choices[0]?.delta?.content;
               if (content) {
                 text += content;
-                // Update using patchMessage mutation
-                await ctx.runMutation(api.messages.patchMessage, {
+                await ctx.runMutation(api.pageMessages.patchMessage, {
                   id: messageId,
-                  patch: { text, textVector: textToVector(text) },
+                  patch: {
+                    text,
+                  },
                 });
               }
             } catch (e) {
@@ -237,8 +306,7 @@ export const streamResponse = action({
         }
       }
 
-      // Mark the message as complete
-      await ctx.runMutation(api.messages.patchMessage, {
+      await ctx.runMutation(api.pageMessages.patchMessage, {
         id: messageId,
         patch: { isComplete: true },
       });
@@ -247,50 +315,19 @@ export const streamResponse = action({
       let errorMessage = "Error: Failed to get AI response";
 
       if (error instanceof Error) {
-        if (error.message.includes("401")) {
-          errorMessage =
-            "Error: Invalid or missing OpenAI API key. Please check your environment variables.";
-        } else if (error.message.includes("429")) {
-          errorMessage = "Error: OpenAI API rate limit exceeded. Please try again later.";
-        } else {
-          errorMessage = `Error: ${error.message}`;
-        }
+        if (error.message.includes("401")) errorMessage = "Error: Invalid API key";
+        else if (error.message.includes("429")) errorMessage = "Error: Rate limit exceeded";
+        else errorMessage = `Error: ${error.message}`;
       }
 
-      await ctx.runMutation(api.messages.patchMessage, {
+      await ctx.runMutation(api.pageMessages.patchMessage, {
         id: messageId,
-        patch: { text: errorMessage, isComplete: true },
+        patch: {
+          text: errorMessage,
+          isComplete: true,
+        },
       });
     }
     return null;
-  },
-});
-
-export const sendMessage = mutation({
-  args: {
-    text: v.string(),
-    sender: v.string(),
-  },
-  handler: async (ctx, args) => {
-    // Check if message is a reminder
-    if (args.text.toLowerCase().startsWith("remind me")) {
-      const reminderText = args.text.slice("remind me".length).trim();
-      // Create todo
-      await ctx.db.insert("todos", {
-        text: reminderText,
-        completed: false,
-        upvotes: 0,
-        downvotes: 0,
-      });
-    }
-
-    // Still save the original message
-    await ctx.db.insert("messages", {
-      text: args.text,
-      sender: args.sender,
-      timestamp: Date.now(),
-      likes: 0,
-      textVector: textToVector(args.text),
-    });
   },
 });

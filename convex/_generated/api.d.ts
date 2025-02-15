@@ -17,6 +17,9 @@ import type * as cleanup from "../cleanup.js";
 import type * as config from "../config.js";
 import type * as crons from "../crons.js";
 import type * as messages from "../messages.js";
+import type * as pageMessages from "../pageMessages.js";
+import type * as pageTodos from "../pageTodos.js";
+import type * as pages from "../pages.js";
 import type * as todos from "../todos.js";
 
 /**
@@ -32,6 +35,9 @@ declare const fullApi: ApiFromModules<{
   config: typeof config;
   crons: typeof crons;
   messages: typeof messages;
+  pageMessages: typeof pageMessages;
+  pageTodos: typeof pageTodos;
+  pages: typeof pages;
   todos: typeof todos;
 }>;
 export declare const api: FilterApi<

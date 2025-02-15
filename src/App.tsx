@@ -26,15 +26,15 @@ import NotFound from "./pages/NotFound";
 import AdminPage from "./pages/admin";
 import type { Id } from "../convex/_generated/dataModel";
 import { useUser, UserButton } from "@clerk/clerk-react";
-import AnimatedHeart from "react-animated-heart";
 import AboutPage from "./pages/about";
+import { DynamicPage } from "./pages/DynamicPage";
 
 const HAPPY_EMOJIS = ["😊", "😄", "🎉", "✨", "🌟"];
 
 interface MessageItemProps {
   message: {
-    _id: Id<"messages">;
-    sender: string;
+    _id: Id<"pageMessages">;
+    sender?: string;
     text: string;
     likes?: number;
     isComplete?: boolean;
@@ -52,7 +52,8 @@ const MessageItem = ({
   isSelected,
   isThreaded,
 }: MessageItemProps) => {
-  const toggleLike = useMutation(api.messages.toggleLike);
+  const toggleLike = useMutation(api.pageMessages.toggleLike);
+  const hasLikes = (message.likes ?? 0) > 0;
 
   return (
     <div
@@ -63,76 +64,68 @@ const MessageItem = ({
       <div className="flex justify-between items-center">
         <div className="flex-1 min-w-0">
           <div className={`${isDark ? "text-zinc-400" : "text-zinc-600"} text-xs mb-0.5`}>
-            {message.sender}
+            {message.sender || "Anonymous"}
           </div>
           <div className={`${textClasses} text-sm`}>{message.text}</div>
         </div>
         <div className="flex items-center gap-1 ml-2 flex-shrink-0">
-          <div className="scale-[0.6] -m-2" role="presentation">
-            <AnimatedHeart
-              isClick={(message.likes ?? 0) > 0}
-              onClick={() => toggleLike({ id: message._id })}
-            />
-          </div>
-          <span className="text-sm text-zinc-500">{message.likes ?? 0}</span>
+          <button
+            onClick={() => toggleLike({ id: message._id })}
+            className={`hover:scale-110 transition-transform pr-[10px] ${hasLikes ? "text-red-500" : isDark ? "text-zinc-400" : "text-zinc-600"}`}>
+            <Heart className="w-4 h-4" fill={hasLikes ? "currentColor" : "none"} />
+          </button>
+          {hasLikes && <span className="text-sm text-red-500">{message.likes}</span>}
         </div>
       </div>
     </div>
   );
 };
 
-function App() {
-  return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<MainApp />} />
-        <Route path="/admin" element={<AdminPage />} />
-        <Route path="/mod" element={<ModPage />} />
-        <Route path="/about" element={<AboutPage />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </Router>
-  );
+interface MainAppProps {
+  pageId?: Id<"pages">;
 }
 
-function MainApp() {
+export const MainApp: React.FC<MainAppProps> = ({ pageId }) => {
+  // Context hooks first
   const { user } = useUser();
+
+  // Query hooks next
+  const messages = pageId ? (useQuery(api.pageMessages.getMessages, { pageId }) ?? []) : [];
+  const todos = pageId ? (useQuery(api.todos.get, { pageId }) ?? []) : [];
+
+  // Mutation hooks
+  const addTodo = useMutation(api.todos.add);
+  const toggleTodo = useMutation(api.todos.toggle);
+  const deleteTodo = useMutation(api.todos.remove);
+  const sendMessage = useMutation(api.pageMessages.send);
+  const upvote = useMutation(api.todos.upvote);
+  const downvote = useMutation(api.todos.downvote);
+  const askAIAction = useMutation(api.messages.askAI);
+  const searchMessages = useAction(api.messages.searchMessages);
+
+  // State hooks
   const [isDark, setIsDark] = useState(false);
   const [showFloatingBox, setShowFloatingBox] = useState(true);
   const [showFeaturesModal, setShowFeaturesModal] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const todos = useQuery(api.todos.get) ?? [];
-  const messages = useQuery(api.messages.get) ?? [];
-  const addTodo = useMutation(api.todos.add);
-  const toggleTodo = useMutation(api.todos.toggle);
-  const deleteTodo = useMutation(api.todos.remove);
-  const sendMessage = useMutation(api.messages.sendMessage);
-  const upvote = useMutation(api.todos.upvote);
-  const downvote = useMutation(api.todos.downvote);
-
   const [newTodo, setNewTodo] = useState("");
   const [newMessage, setNewMessage] = useState("");
   const [streamedMessage, setStreamedMessage] = useState("");
-  const [streamedMessageId, setStreamedMessageId] = useState<Id<"messages"> | null>(null);
-
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  // Add search state
+  const [streamedMessageId, setStreamedMessageId] = useState<Id<"pageMessages"> | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedMessageIds, setSelectedMessageIds] = useState<Id<"messages">[]>([]);
-
-  // Add search function
-  const searchMessages = useAction(api.messages.searchMessages);
-
-  const askAIAction = useMutation(api.messages.askAI);
-
+  const [selectedMessageIds, setSelectedMessageIds] = useState<Id<"pageMessages">[]>([]);
   const [hasUserInteracted, setHasUserInteracted] = useState(false);
+
+  // Ref hooks
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const audioRef = useRef<HTMLAudioElement>(null);
   const initialLoadRef = useRef(true);
 
+  // Effect hooks
   useEffect(() => {
-    if (messages.length > 0) messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (messages && messages.length > 0)
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, streamedMessage]);
 
   useEffect(() => {
@@ -140,6 +133,7 @@ function MainApp() {
   }, [newMessage]);
 
   useEffect(() => {
+    if (!messages) return;
     const message = messages.find((m) => m._id === streamedMessageId);
     if (message?.isComplete) {
       setStreamedMessageId(null);
@@ -150,7 +144,7 @@ function MainApp() {
   }, [messages, streamedMessageId]);
 
   useEffect(() => {
-    if (messages.length > 0 && !isMuted) {
+    if (messages && messages.length > 0 && !isMuted) {
       const lastMessage = messages[0];
       if (lastMessage) {
         audioRef.current?.play().catch(console.error);
@@ -158,41 +152,124 @@ function MainApp() {
     }
   }, [messages, isMuted]);
 
-  const handleSubmitTodo = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newTodo.trim()) return;
-    await addTodo({ text: newTodo.trim() });
-    setNewTodo("");
-  };
-
-  const handleSubmitMessage = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newMessage.trim()) return;
-
-    if (newMessage.trim().startsWith("@ai")) {
-      const prompt = newMessage.slice(3).trim() || "Hello! How can I help you today?";
-      await sendMessage({ text: newMessage.trim(), sender: "User" });
-      const messageId = await askAIAction({ prompt });
-      setStreamedMessageId(messageId);
-      setStreamedMessage("");
-    } else await sendMessage({ text: newMessage.trim(), sender: "User" });
-
-    setNewMessage("");
-  };
-
-  const sendEmoji = () => {
-    const randomEmoji = HAPPY_EMOJIS[Math.floor(Math.random() * HAPPY_EMOJIS.length)];
-    sendMessage({
-      text: randomEmoji,
-      sender: "User",
-    });
-  };
-
+  // Memoized values
   const iconClasses = isDark ? "text-zinc-400" : "text-zinc-600";
   const cardClasses = isDark ? "bg-zinc-900" : "bg-white border border-zinc-200 shadow-sm";
   const textClasses = isDark ? "text-zinc-400" : "text-zinc-600";
   const bgClasses = isDark ? "bg-slate-950" : "bg-[#F5F5F4]";
 
+  // Event handlers
+  const handleSubmitTodo = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newTodo.trim() || !pageId) return;
+    await addTodo({ text: newTodo.trim(), pageId });
+    setNewTodo("");
+  };
+
+  const handleSubmitMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newMessage.trim() || !pageId) return;
+
+    if (newMessage.trim().startsWith("@ai")) {
+      const prompt = newMessage.slice(3).trim() || "Hello! How can I help you today?";
+      await sendMessage({ text: newMessage.trim(), sender: "User", pageId });
+      const messageId = await askAIAction({ prompt, pageId });
+      setStreamedMessageId(messageId);
+      setStreamedMessage("");
+    } else if (newMessage.toLowerCase().includes("remind me") && pageId) {
+      const reminderText = newMessage.toLowerCase().replace("remind me", "").trim();
+
+      if (reminderText) {
+        await sendMessage({ text: newMessage.trim(), sender: "User", pageId });
+        await addTodo({ text: reminderText, pageId });
+        await sendMessage({
+          text: `✅ I've added "${reminderText}" to your todo list!`,
+          sender: "System",
+          pageId,
+        });
+      }
+    } else {
+      await sendMessage({ text: newMessage.trim(), sender: "User", pageId });
+    }
+
+    setNewMessage("");
+  };
+
+  const sendEmoji = () => {
+    if (!pageId) return;
+    const randomEmoji = HAPPY_EMOJIS[Math.floor(Math.random() * HAPPY_EMOJIS.length)];
+    sendMessage({
+      text: randomEmoji,
+      sender: "User",
+      pageId,
+    });
+  };
+
+  // Message list rendering
+  const messageList = messages.map((message, index) => {
+    const messageText = streamedMessageId === message._id ? streamedMessage : message.text;
+    const likes = message.likes ?? 0;
+    const isAiResponse =
+      message.sender === "AI" && index > 0 && messages[index - 1].text.startsWith("@ai");
+
+    return (
+      <MessageItem
+        key={message._id}
+        message={{
+          _id: message._id,
+          sender: message.sender,
+          text: messageText,
+          likes,
+          isComplete: message.isComplete,
+        }}
+        isDark={isDark}
+        textClasses={textClasses}
+        isSelected={searchQuery !== "" && selectedMessageIds.includes(message._id)}
+        isThreaded={isAiResponse}
+      />
+    );
+  });
+
+  // Todo list rendering
+  const todoList = todos.map((todo) => (
+    <div
+      key={todo._id}
+      className={`flex items-center gap-3 p-3 ${isDark ? "bg-zinc-800/50" : "bg-zinc-100"} rounded-lg group`}>
+      <button
+        onClick={() => toggleTodo({ id: todo._id })}
+        className={`${iconClasses} hover:opacity-80 transition-colors`}>
+        {todo.completed ? <CheckCircle2 className="w-5 h-5" /> : <Circle className="w-5 h-5" />}
+      </button>
+      <span className={`flex-1 ${todo.completed ? "text-zinc-500 line-through" : iconClasses}`}>
+        {todo.text}
+      </span>
+      <div className="flex items-center gap-2">
+        <button
+          onClick={() => upvote({ id: todo._id })}
+          className={`${iconClasses} hover:text-green-500 transition-colors flex items-center gap-1`}>
+          <ThumbsUp
+            className={`w-4 h-4 ${(todo.upvotes ?? 0) > 0 ? "fill-green-500 text-green-500" : ""}`}
+          />
+          {(todo.upvotes ?? 0) > 0 && <span className="text-sm">{todo.upvotes}</span>}
+        </button>
+        <button
+          onClick={() => downvote({ id: todo._id })}
+          className={`${iconClasses} hover:text-red-500 transition-colors flex items-center gap-1`}>
+          <ThumbsDown
+            className={`w-4 h-4 ${(todo.downvotes ?? 0) > 0 ? "fill-red-500 text-red-500" : ""}`}
+          />
+          {(todo.downvotes ?? 0) > 0 && <span className="text-sm">{todo.downvotes}</span>}
+        </button>
+        <button
+          onClick={() => deleteTodo({ id: todo._id })}
+          className={`opacity-0 group-hover:opacity-100 ${iconClasses} hover:text-red-400 transition-all`}>
+          <Trash2 className="w-4 h-4" />
+        </button>
+      </div>
+    </div>
+  ));
+
+  // Render
   return (
     <div className={`min-h-screen ${cardClasses} relative flex flex-col font-['Inter']`}>
       {/* Grid background with gradient */}
@@ -382,34 +459,7 @@ function MainApp() {
               <div className="flex-1 overflow-y-auto mb-4">
                 <div className="flex flex-col h-full">
                   <div className="space-y-2 mt-auto">
-                    {messages.map((message, index) => {
-                      const messageText =
-                        streamedMessageId === message._id ? streamedMessage : message.text;
-                      const likes = message.likes ?? 0;
-                      const isAiResponse =
-                        message.sender === "AI" &&
-                        index > 0 &&
-                        messages[index - 1].text.startsWith("@ai");
-
-                      return (
-                        <MessageItem
-                          key={message._id}
-                          message={{
-                            _id: message._id,
-                            sender: message.sender,
-                            text: messageText,
-                            likes,
-                            isComplete: message.isComplete,
-                          }}
-                          isDark={isDark}
-                          textClasses={textClasses}
-                          isSelected={
-                            searchQuery !== "" && selectedMessageIds.includes(message._id)
-                          }
-                          isThreaded={isAiResponse}
-                        />
-                      );
-                    })}
+                    {messageList}
                     <div ref={messagesEndRef} />
                   </div>
                 </div>
@@ -458,8 +508,8 @@ function MainApp() {
                   value={searchQuery}
                   onChange={(e) => {
                     setSearchQuery(e.target.value);
-                    if (e.target.value) {
-                      searchMessages({ query: e.target.value })
+                    if (e.target.value && pageId) {
+                      searchMessages({ query: e.target.value, pageId })
                         .then((results) => {
                           console.log("Search results received:", results);
                           setSelectedMessageIds(results);
@@ -534,52 +584,7 @@ function MainApp() {
                 </div>
               </form>
 
-              <div className="space-y-3">
-                {todos.map((todo) => (
-                  <div
-                    key={todo._id}
-                    className={`flex items-center gap-3 p-3 ${isDark ? "bg-zinc-800/50" : "bg-zinc-100"} rounded-lg group`}>
-                    <button
-                      onClick={() => toggleTodo({ id: todo._id })}
-                      className={`${iconClasses} hover:opacity-80 transition-colors`}>
-                      {todo.completed ? (
-                        <CheckCircle2 className="w-5 h-5" />
-                      ) : (
-                        <Circle className="w-5 h-5" />
-                      )}
-                    </button>
-                    <span
-                      className={`flex-1 ${todo.completed ? "text-zinc-500 line-through" : iconClasses}`}>
-                      {todo.text}
-                    </span>
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => upvote({ id: todo._id })}
-                        className={`${iconClasses} hover:text-green-500 transition-colors flex items-center gap-1`}>
-                        <ThumbsUp
-                          className={`w-4 h-4 ${(todo.upvotes ?? 0) > 0 ? "fill-green-500 text-green-500" : ""}`}
-                        />
-                        {(todo.upvotes ?? 0) > 0 && <span className="text-sm">{todo.upvotes}</span>}
-                      </button>
-                      <button
-                        onClick={() => downvote({ id: todo._id })}
-                        className={`${iconClasses} hover:text-red-500 transition-colors flex items-center gap-1`}>
-                        <ThumbsDown
-                          className={`w-4 h-4 ${(todo.downvotes ?? 0) > 0 ? "fill-red-500 text-red-500" : ""}`}
-                        />
-                        {(todo.downvotes ?? 0) > 0 && (
-                          <span className="text-sm">{todo.downvotes}</span>
-                        )}
-                      </button>
-                      <button
-                        onClick={() => deleteTodo({ id: todo._id })}
-                        className={`opacity-0 group-hover:opacity-100 ${iconClasses} hover:text-red-400 transition-all`}>
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <div className="space-y-3">{todoList}</div>
             </div>
           </div>
         </div>
@@ -654,6 +659,38 @@ function MainApp() {
         <source src="/message.mp3" type="audio/mpeg" />
       </audio>
     </div>
+  );
+};
+
+function App() {
+  const defaultPage = useQuery(api.pages.getPageBySlug, { slug: "default" });
+  const createDefaultPage = useMutation(api.pages.createPage);
+
+  useEffect(() => {
+    if (defaultPage === null)
+      createDefaultPage({ slug: "default", title: "Default Page" }).catch((error) => {
+        if (!error.message?.includes("already exists"))
+          console.error("Failed to create default page:", error);
+      });
+  }, [defaultPage]);
+
+  if (defaultPage === undefined)
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+
+  if (defaultPage === null)
+    return <div className="min-h-screen flex items-center justify-center">Error loading page</div>;
+
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<MainApp pageId={defaultPage._id} />} />
+        <Route path="/admin" element={<AdminPage />} />
+        <Route path="/mod" element={<ModPage />} />
+        <Route path="/about" element={<AboutPage />} />
+        <Route path="/:slug" element={<DynamicPage />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </Router>
   );
 }
 
