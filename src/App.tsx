@@ -23,6 +23,7 @@ import NotFound from "./pages/NotFound";
 import AdminPage from "./pages/admin";
 import type { Id } from "../convex/_generated/dataModel";
 import { useUser, UserButton } from "@clerk/clerk-react";
+import AnimatedHeart from "react-animated-heart";
 
 const HAPPY_EMOJIS = ["😊", "😄", "🎉", "✨", "🌟"];
 
@@ -31,7 +32,7 @@ interface MessageItemProps {
     _id: Id<"messages">;
     sender: string;
     text: string;
-    likes: number;
+    likes?: number;
     isComplete?: boolean;
   };
   isDark: boolean;
@@ -53,8 +54,8 @@ const MessageItem = ({
     <div
       className={`${isDark ? "bg-zinc-800/50" : "bg-zinc-100"} 
         ${isSelected ? "ring-2 ring-blue-500" : ""} 
-        ${isThreaded ? "ml-8 border-l-2 border-blue-500 pl-4" : ""}
-        rounded-lg p-4 mb-2 animate-glow transition-all`}>
+        ${isThreaded ? "ml-8 border-l-2 border-zinc-300 pl-4" : ""}
+        rounded-lg p-4 mb-2 ransition-all`}>
       <div className="flex justify-between items-start">
         <div>
           <div className={`${isDark ? "text-zinc-400" : "text-zinc-600"} text-xs mb-1`}>
@@ -62,12 +63,15 @@ const MessageItem = ({
           </div>
           <div className={`${textClasses} text-sm`}>{message.text}</div>
         </div>
-        <button
-          onClick={() => toggleLike({ id: message._id })}
-          className={`${isDark ? "text-zinc-400" : "text-zinc-600"} hover:text-red-500 transition-colors flex items-center gap-1`}>
-          <Heart className={`w-4 h-4 ${message.likes > 0 ? "fill-red-500 text-red-500" : ""}`} />
-          {message.likes > 0 && <span className="text-sm">{message.likes}</span>}
-        </button>
+        <div className="flex items-center gap-2">
+          <div className="scale-[0.4] -m-3">
+            <AnimatedHeart
+              isClick={(message.likes ?? 0) > 0}
+              onClick={() => toggleLike({ id: message._id })}
+            />
+          </div>
+          <span className="text-sm text-zinc-500">{message.likes ?? 0}</span>
+        </div>
       </div>
     </div>
   );
@@ -374,7 +378,7 @@ function MainApp() {
                     {messages.map((message, index) => {
                       const messageText =
                         streamedMessageId === message._id ? streamedMessage : message.text;
-                      const likes = typeof message.likes === "number" ? message.likes : 0;
+                      const likes = message.likes ?? 0;
                       const isAiResponse =
                         message.sender === "AI" &&
                         index > 0 &&
