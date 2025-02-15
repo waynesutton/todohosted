@@ -18,6 +18,7 @@ import {
   Menu,
   Volume2,
   VolumeX,
+  Copy,
 } from "lucide-react";
 import { useMutation, useQuery, useAction } from "convex/react";
 import { api } from "../convex/_generated/api";
@@ -28,6 +29,11 @@ import type { Id } from "../convex/_generated/dataModel";
 import { useUser, UserButton } from "@clerk/clerk-react";
 import AboutPage from "./pages/about";
 import { DynamicPage } from "./pages/DynamicPage";
+import ReactMarkdown from "react-markdown";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { oneDark, oneLight } from "react-syntax-highlighter/dist/esm/styles/prism";
+import type { CodeProps } from "react-markdown/lib/ast-to-react";
+import type { Components } from "react-markdown";
 
 const HAPPY_EMOJIS = ["😊", "😄", "🎉", "✨", "🌟"];
 
@@ -54,19 +60,114 @@ const MessageItem = ({
 }: MessageItemProps) => {
   const toggleLike = useMutation(api.pageMessages.toggleLike);
   const hasLikes = (message.likes ?? 0) > 0;
+  const [copied, setCopied] = useState(false);
+
+  const copyCode = (code: string) => {
+    navigator.clipboard.writeText(code);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   return (
     <div
       className={`${isDark ? "bg-zinc-800/50" : "bg-zinc-100"} 
         ${isSelected ? "ring-2 ring-[#DFE0DD]" : ""} 
         ${isThreaded ? "ml-8 border-l-2 border-zinc-300 pl-4" : ""}
-        rounded-lg py-1.5 px-2 mb-1 ransition-all`}>
-      <div className="flex justify-between items-center">
+        rounded-lg py-1.5 px-2 mb-1 transition-all`}>
+      <div className="flex justify-between items-start">
         <div className="flex-1 min-w-0">
           <div className={`${isDark ? "text-zinc-400" : "text-zinc-600"} text-xs mb-0.5`}>
             {message.sender || "Anonymous"}
           </div>
-          <div className={`${textClasses} text-sm`}>{message.text}</div>
+          <div className={`${textClasses} text-sm text-left`}>
+            <ReactMarkdown
+              components={{
+                h1: ({ children }) => <h1 className="text-2xl font-bold mb-2">{children}</h1>,
+                h2: ({ children }) => <h2 className="text-xl font-bold mb-2">{children}</h2>,
+                h3: ({ children }) => <h3 className="text-lg font-bold mb-2">{children}</h3>,
+                h4: ({ children }) => <h4 className="text-base font-bold mb-2">{children}</h4>,
+                h5: ({ children }) => <h5 className="text-sm font-bold mb-2">{children}</h5>,
+                h6: ({ children }) => <h6 className="text-xs font-bold mb-2">{children}</h6>,
+                p: ({ children }) => <p className="mb-2">{children}</p>,
+                ul: ({ children }) => <ul className="list-disc pl-4 mb-2">{children}</ul>,
+                ol: ({ children }) => <ol className="list-decimal pl-4 mb-2">{children}</ol>,
+                li: ({ children }) => <li className="mb-1">{children}</li>,
+                blockquote: ({ children }) => (
+                  <blockquote className="border-l-4 border-gray-300 pl-4 italic mb-2">
+                    {children}
+                  </blockquote>
+                ),
+                a: ({ href, children }) => (
+                  <a
+                    href={href}
+                    className="text-blue-500 hover:underline"
+                    target="_blank"
+                    rel="noopener noreferrer">
+                    {children}
+                  </a>
+                ),
+                strong: ({ children }) => <strong className="font-bold">{children}</strong>,
+                em: ({ children }) => <em className="italic">{children}</em>,
+                code({ inline, className, children, ...props }) {
+                  const match = /language-(\w+)/.exec(className || "");
+                  const code = String(children).replace(/\n$/, "");
+
+                  if (!inline && match) {
+                    return (
+                      <div className="relative">
+                        <div className="flex justify-between items-center bg-zinc-700 text-zinc-300 px-4 py-1 text-xs rounded-t">
+                          <span>{match[1].toUpperCase()}</span>
+                          <button
+                            onClick={() => copyCode(code)}
+                            className="hover:text-white transition-colors">
+                            {copied ? "Copied!" : <Copy className="w-4 h-4" />}
+                          </button>
+                        </div>
+                        <SyntaxHighlighter
+                          language={match[1]}
+                          style={isDark ? oneDark : oneLight}
+                          customStyle={{
+                            margin: 0,
+                            borderTopLeftRadius: 0,
+                            borderTopRightRadius: 0,
+                          }}>
+                          {code}
+                        </SyntaxHighlighter>
+                      </div>
+                    );
+                  }
+
+                  return inline ? (
+                    <code className="bg-zinc-200 dark:bg-zinc-700 px-1 py-0.5 rounded" {...props}>
+                      {children}
+                    </code>
+                  ) : (
+                    <div className="relative">
+                      <div className="flex justify-between items-center bg-zinc-700 text-zinc-300 px-4 py-1 text-xs rounded-t">
+                        <span>CODE</span>
+                        <button
+                          onClick={() => copyCode(code)}
+                          className="hover:text-white transition-colors">
+                          {copied ? "Copied!" : <Copy className="w-4 h-4" />}
+                        </button>
+                      </div>
+                      <SyntaxHighlighter
+                        language="plaintext"
+                        style={isDark ? oneDark : oneLight}
+                        customStyle={{
+                          margin: 0,
+                          borderTopLeftRadius: 0,
+                          borderTopRightRadius: 0,
+                        }}>
+                        {code}
+                      </SyntaxHighlighter>
+                    </div>
+                  );
+                },
+              }}>
+              {message.text}
+            </ReactMarkdown>
+          </div>
         </div>
         <div className="flex items-center gap-1 ml-2 flex-shrink-0">
           <button

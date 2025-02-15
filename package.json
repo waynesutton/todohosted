@@ -12,13 +12,16 @@
   "dependencies": {
     "@clerk/clerk-react": "^5.22.12",
     "@types/node": "^22.13.1",
+    "@types/react-syntax-highlighter": "^15.5.13",
     "convex": "^1.19.1",
     "lucide-react": "^0.344.0",
     "openai": "^4.83.0",
     "react": "^18.3.1",
     "react-animated-heart": "^0.0.8",
     "react-dom": "^18.3.1",
-    "react-router-dom": "^7.1.5"
+    "react-markdown": "^9.0.3",
+    "react-router-dom": "^7.1.5",
+    "react-syntax-highlighter": "^15.6.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.9.1",

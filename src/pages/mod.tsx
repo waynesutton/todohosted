@@ -273,15 +273,15 @@ const AdminDashboard = () => {
 
           <section className="mb-8">
             <h2 className="text-xl font-semibold mb-2">Chat Messages</h2>
-            <button
+            {/* <button
               className="mb-4 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
               onClick={async () => {
                 if (window.confirm("Are you sure you want to delete all chat messages?")) {
                   await deleteAllMessages();
                 }
               }}>
-              Delete All Chat Messages
-            </button>
+              Delete All Chat Messagess
+            </button> */}
             <div className="space-y-2">
               {messages.map((message) => (
                 <div
@@ -311,15 +311,15 @@ const AdminDashboard = () => {
 
           <section>
             <h2 className="text-xl font-semibold mb-2">Reminders</h2>
-            <button
+            {/* <button
               className="mb-4 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
               onClick={async () => {
                 if (window.confirm("Are you sure you want to delete all reminders?")) {
                   await deleteAllTodos();
                 }
               }}>
-              Delete All Reminders
-            </button>
+              Delete All Reminderss
+            </button> */}
             <div className="space-y-2">
               {todos.map((todo) => (
                 <div
