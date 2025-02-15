@@ -19,6 +19,8 @@ import {
   Volume2,
   VolumeX,
   Copy,
+  Edit2,
+  Save,
 } from "lucide-react";
 import { useMutation, useQuery, useAction } from "convex/react";
 import { api } from "../convex/_generated/api";
@@ -193,6 +195,7 @@ export const MainApp: React.FC<MainAppProps> = ({ pageId }) => {
   // Query hooks next
   const messages = pageId ? (useQuery(api.pageMessages.getMessages, { pageId }) ?? []) : [];
   const todos = pageId ? (useQuery(api.todos.get, { pageId }) ?? []) : [];
+  const notes = pageId ? (useQuery(api.pageNotes.getNotes, { pageId }) ?? []) : [];
 
   // Mutation hooks
   const addTodo = useMutation(api.todos.add);
@@ -203,6 +206,9 @@ export const MainApp: React.FC<MainAppProps> = ({ pageId }) => {
   const downvote = useMutation(api.todos.downvote);
   const askAIAction = useMutation(api.messages.askAI);
   const searchMessages = useAction(api.messages.searchMessages);
+  const createNote = useMutation(api.pageNotes.createNote);
+  const updateNote = useMutation(api.pageNotes.updateNote);
+  const deleteNote = useMutation(api.pageNotes.deleteNote);
 
   // State hooks
   const [isDark, setIsDark] = useState(false);
@@ -220,6 +226,11 @@ export const MainApp: React.FC<MainAppProps> = ({ pageId }) => {
   const [username, setUsername] = useState("setusername");
   const [isEditingUsername, setIsEditingUsername] = useState(false);
   const [tempUsername, setTempUsername] = useState("");
+  const [isCreatingNote, setIsCreatingNote] = useState(false);
+  const [editingNoteId, setEditingNoteId] = useState<Id<"pageNotes"> | null>(null);
+  const [noteTitle, setNoteTitle] = useState("");
+  const [noteContent, setNoteContent] = useState("");
+  const [copiedNoteId, setCopiedNoteId] = useState<Id<"pageNotes"> | null>(null);
 
   // Ref hooks
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -261,6 +272,7 @@ export const MainApp: React.FC<MainAppProps> = ({ pageId }) => {
   const cardClasses = isDark ? "bg-zinc-900" : "bg-white border border-zinc-200 shadow-sm";
   const textClasses = isDark ? "text-zinc-400" : "text-zinc-600";
   const bgClasses = isDark ? "bg-slate-950" : "bg-[#F5F5F4]";
+  const mutedTextClasses = isDark ? "text-zinc-500" : "text-zinc-500";
 
   // Event handlers
   const handleSubmitTodo = async (e: React.FormEvent) => {
@@ -307,6 +319,35 @@ export const MainApp: React.FC<MainAppProps> = ({ pageId }) => {
       sender: "User",
       pageId,
     });
+  };
+
+  const handleCreateNote = async () => {
+    if (!pageId || !noteTitle.trim()) return;
+
+    await createNote({
+      pageId,
+      title: noteTitle.trim(),
+      content: noteContent.trim(),
+    });
+
+    setNoteTitle("");
+    setNoteContent("");
+    setIsCreatingNote(false);
+  };
+
+  const handleUpdateNote = async (id: Id<"pageNotes">) => {
+    await updateNote({
+      id,
+      title: noteTitle.trim(),
+      content: noteContent.trim(),
+    });
+    setEditingNoteId(null);
+  };
+
+  const copyNoteContent = (content: string, noteId: Id<"pageNotes">) => {
+    navigator.clipboard.writeText(content);
+    setCopiedNoteId(noteId);
+    setTimeout(() => setCopiedNoteId(null), 2000);
   };
 
   // Message list rendering
@@ -721,7 +762,7 @@ export const MainApp: React.FC<MainAppProps> = ({ pageId }) => {
               <span className="text-sm">(Public)</span>
             </h2>
             <div
-              className={`${cardClasses} rounded-lg p-4 hover:border-zinc-300 transition-colors`}>
+              className={`${cardClasses} rounded-lg p-4 hover:border-zinc-300 transition-colors mb-6`}>
               <form onSubmit={handleSubmitTodo} className="mb-6">
                 <div
                   className={`flex items-center gap-3 ${isDark ? "bg-zinc-800" : "bg-white"} rounded-lg p-3`}>
@@ -737,6 +778,142 @@ export const MainApp: React.FC<MainAppProps> = ({ pageId }) => {
               </form>
 
               <div className="space-y-3">{todoList}</div>
+            </div>
+
+            {/* Notes Section */}
+            <h2 className={`text-xl font-normal mb-3 tracking-tighter ${iconClasses}`}>Notes</h2>
+            <div className={`${cardClasses} rounded-lg p-4`}>
+              {!isCreatingNote && (
+                <button
+                  onClick={() => setIsCreatingNote(true)}
+                  className={`flex items-center gap-2 ${isDark ? "text-zinc-400" : "text-zinc-600"} hover:text-blue-500 transition-colors mb-4`}>
+                  <PlusCircle className="w-4 h-4" />
+                  <span>New Note</span>
+                </button>
+              )}
+
+              {(isCreatingNote || editingNoteId) && (
+                <div className={`${isDark ? "bg-zinc-800" : "bg-white"} rounded-lg p-4 mb-4`}>
+                  <input
+                    type="text"
+                    value={noteTitle}
+                    onChange={(e) => setNoteTitle(e.target.value)}
+                    placeholder="Note title..."
+                    className={`w-full mb-2 bg-transparent outline-none ${isDark ? "text-zinc-100" : "text-zinc-900"} placeholder-zinc-500 text-lg font-medium`}
+                  />
+                  <textarea
+                    value={noteContent}
+                    onChange={(e) => setNoteContent(e.target.value)}
+                    placeholder="Start typing..."
+                    rows={4}
+                    className={`w-full bg-transparent outline-none ${isDark ? "text-zinc-100" : "text-zinc-900"} placeholder-zinc-500 resize-none`}
+                  />
+                  <div className="flex justify-end gap-2 mt-2">
+                    <button
+                      onClick={() => {
+                        setIsCreatingNote(false);
+                        setEditingNoteId(null);
+                        setNoteTitle("");
+                        setNoteContent("");
+                      }}
+                      className="px-3 py-1 text-sm bg-white text-black rounded border border-zinc-200 hover:bg-zinc-50">
+                      Cancel
+                    </button>
+                    <button
+                      onClick={() =>
+                        editingNoteId ? handleUpdateNote(editingNoteId) : handleCreateNote()
+                      }
+                      className="px-3 py-1 text-sm bg-black text-white rounded hover:bg-zinc-800">
+                      {editingNoteId ? "Save" : "Create"}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              <div className="space-y-4">
+                {notes.map((note) => (
+                  <div
+                    key={note._id}
+                    className={`${isDark ? "bg-zinc-800/50" : "bg-zinc-100"} rounded-lg p-4 group`}>
+                    {editingNoteId === note._id ? (
+                      <div className={`${isDark ? "bg-zinc-800" : "bg-white"} rounded-lg p-4`}>
+                        <input
+                          type="text"
+                          value={noteTitle}
+                          onChange={(e) => setNoteTitle(e.target.value)}
+                          placeholder="Note title..."
+                          className={`w-full mb-2 bg-transparent outline-none ${isDark ? "text-zinc-100" : "text-zinc-900"} placeholder-zinc-500 text-lg font-medium`}
+                        />
+                        <textarea
+                          value={noteContent}
+                          onChange={(e) => setNoteContent(e.target.value)}
+                          placeholder="Start typing..."
+                          rows={4}
+                          className={`w-full bg-transparent outline-none ${isDark ? "text-zinc-100" : "text-zinc-900"} placeholder-zinc-500 resize-none`}
+                        />
+                        <div className="flex justify-end gap-2 mt-2">
+                          <button
+                            onClick={() => {
+                              setEditingNoteId(null);
+                              setNoteTitle("");
+                              setNoteContent("");
+                            }}
+                            className="px-3 py-1 text-sm bg-white text-black rounded border border-zinc-200 hover:bg-zinc-50">
+                            Cancel
+                          </button>
+                          <button
+                            onClick={() => handleUpdateNote(note._id)}
+                            className="px-3 py-1 text-sm bg-black text-white rounded hover:bg-zinc-800">
+                            Save
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="flex justify-between items-start mb-2">
+                          <h3
+                            className={`font-medium ${isDark ? "text-zinc-100" : "text-zinc-900"}`}>
+                            {note.title}
+                          </h3>
+                          <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button
+                              onClick={() => copyNoteContent(note.content, note._id)}
+                              className={`${iconClasses} hover:text-blue-500 transition-colors`}>
+                              {copiedNoteId === note._id ? "Copied!" : <Copy className="w-4 h-4" />}
+                            </button>
+                            <button
+                              onClick={() => {
+                                setEditingNoteId(note._id);
+                                setNoteTitle(note.title);
+                                setNoteContent(note.content);
+                              }}
+                              className={`${iconClasses} hover:text-blue-500 transition-colors`}>
+                              <Edit2 className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => {
+                                if (window.confirm("Delete this note?")) {
+                                  deleteNote({ id: note._id });
+                                }
+                              }}
+                              className={`${iconClasses} hover:text-red-500 transition-colors`}>
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                        <p className={`${textClasses} whitespace-pre-wrap`}>
+                          {note.content.length > 250
+                            ? `${note.content.slice(0, 250)}...`
+                            : note.content}
+                        </p>
+                        <div className={`text-xs ${mutedTextClasses} mt-2`}>
+                          Last updated: {new Date(note.updatedAt).toLocaleString()}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>

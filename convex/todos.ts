@@ -105,3 +105,10 @@ export const deleteAllTodos = mutation({
     for (const todo of todos) await ctx.db.delete(todo._id);
   },
 });
+
+export const getAll = query({
+  args: {},
+  handler: async (ctx) => {
+    return await ctx.db.query("pageTodos").collect();
+  },
+});

@@ -51,4 +51,12 @@ export default defineSchema({
     downvotes: v.optional(v.number()),
     timestamp: v.number(),
   }).index("by_page", ["pageId"]),
+
+  pageNotes: defineTable({
+    pageId: v.id("pages"),
+    title: v.string(),
+    content: v.string(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  }).index("by_page", ["pageId"]),
 });

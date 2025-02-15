@@ -21,6 +21,17 @@ An open source chat and reminder application built with [Convex](https://convex.
   - Dark/Light mode support
   - Threaded AI responses
 
+- **Notes:**
+
+  - Create and manage notes for each page
+  - Rich text editing support
+  - Title and content organization
+  - Preview with content truncation
+  - Copy note content with one click
+  - Real-time updates across all clients
+  - Edit and delete functionality
+  - Timestamp tracking for updates
+
 - **Reminders/Todos:**
 
   - Create and manage public reminders
@@ -40,6 +51,9 @@ An open source chat and reminder application built with [Convex](https://convex.
   - Create and manage multiple chat rooms
   - Enable/disable chat rooms
   - View message and reminder statistics
+  - Toggle view for messages, todos, and notes per page
+  - Bulk actions for clearing messages, todos, and notes
+  - Individual content management for each page
 
 - **User Experience:**
   - Customizable username setting
@@ -50,6 +64,8 @@ An open source chat and reminder application built with [Convex](https://convex.
   - Instant search results
   - Beautiful UI with smooth transitions
   - Hover tooltips for better UX
+  - Expandable content sections
+  - Tab-based navigation for different content types
 
 ## Stack
 

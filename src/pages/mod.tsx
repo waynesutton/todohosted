@@ -4,6 +4,7 @@ import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import NotFound from "./NotFound";
 import { Menu, Sun, Moon, X } from "lucide-react";
+import { Id } from "../../convex/_generated/dataModel";
 
 const AdminDashboard = () => {
   // User and auth hooks
@@ -12,6 +13,8 @@ const AdminDashboard = () => {
   // State hooks
   const [newPageSlug, setNewPageSlug] = useState("");
   const [newPageTitle, setNewPageTitle] = useState("");
+  const [expandedPages, setExpandedPages] = useState<Record<string, boolean>>({});
+  const [activeTab, setActiveTab] = useState<Record<string, "messages" | "todos" | "notes">>({});
   const [isDark, setIsDark] = useState(() => {
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("adminDarkMode");
@@ -28,6 +31,9 @@ const AdminDashboard = () => {
     ? (useQuery(api.pageMessages.getMessages, { pageId: defaultPage._id }) ?? [])
     : [];
   const todos = defaultPage ? (useQuery(api.todos.get, { pageId: defaultPage._id }) ?? []) : [];
+  const pageMessages = useQuery(api.pageMessages.getAllMessages) ?? [];
+  const pageTodos = useQuery(api.todos.getAll) ?? [];
+  const pageNotes = useQuery(api.pageNotes.getAllNotes) ?? [];
 
   // Mutation hooks
   const createPage = useMutation(api.pages.createPage);
@@ -37,9 +43,11 @@ const AdminDashboard = () => {
   const deleteAllTodos = useMutation(api.todos.deleteAllTodos);
   const deleteMessage = useMutation(api.pageMessages.deleteMessage);
   const deleteTodo = useMutation(api.todos.remove);
+  const deleteNote = useMutation(api.pageNotes.deleteNote);
   const sendPageMessage = useMutation(api.pageMessages.send);
   const toggleLike = useMutation(api.pageMessages.toggleLike);
-  const getMessages = useMutation(api.pageMessages.getMessages);
+  const getMessagesForCsv = useMutation(api.pageMessages.getMessagesForCsv);
+  const deleteAllNotes = useMutation(api.pageNotes.deleteAllNotes);
 
   // Effect hooks
   React.useEffect(() => {
@@ -87,8 +95,10 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleDownloadCsv = async (page: { _id: string; slug: string }) => {
-    const pageMessages = await getMessages({ pageId: page._id });
+  const handleDownloadCsv = async (page: { _id: Id<"pages">; slug: string }) => {
+    const pageMessages = await getMessagesForCsv({ pageId: page._id });
+    if (!pageMessages) return;
+
     const csvContent = [
       ["Timestamp", "Sender", "Message", "Likes"].join(","),
       ...pageMessages.map((msg) =>
@@ -210,62 +220,203 @@ const AdminDashboard = () => {
               {pages.map((page) => (
                 <div
                   key={page._id}
-                  className={`p-4 border rounded-lg ${cardClasses} ${isDark ? "border-zinc-700" : "border-zinc-200"} flex justify-between items-center`}>
-                  <div>
-                    <h3 className="font-medium">{page.title}</h3>
-                    <p className={mutedTextClasses}>/{page.slug}</p>
-                    <p className="text-xs text-gray-400">
-                      Created: {new Date(page.createdAt).toLocaleString()}
-                    </p>
+                  className={`p-4 border rounded-lg ${cardClasses} ${isDark ? "border-zinc-700" : "border-zinc-200"}`}>
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <h3 className="font-medium">{page.title}</h3>
+                      <p className={mutedTextClasses}>/{page.slug}</p>
+                      <p className="text-xs text-gray-400">
+                        Created: {new Date(page.createdAt).toLocaleString()}
+                      </p>
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <div className="flex items-center gap-2">
+                        <a
+                          href={`/${page.slug}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600">
+                          View
+                        </a>
+                        <button
+                          onClick={() => togglePageStatus({ id: page._id })}
+                          className={`px-3 py-1 rounded ${page.isActive ? "bg-yellow-500 hover:bg-yellow-600" : "bg-green-500 hover:bg-green-600"} text-white`}>
+                          {page.isActive ? "Disable" : "Enable"}
+                        </button>
+                        <button
+                          onClick={() => handleDownloadCsv(page)}
+                          className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600">
+                          Download Chat CSV
+                        </button>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={async () => {
+                            if (window.confirm("Delete all chat messages for this page?")) {
+                              await deleteAllMessages({ pageId: page._id });
+                            }
+                          }}
+                          className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600">
+                          Clear Chat
+                        </button>
+                        <button
+                          onClick={async () => {
+                            if (window.confirm("Delete all todos for this page?")) {
+                              await deleteAllTodos({ pageId: page._id });
+                            }
+                          }}
+                          className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600">
+                          Clear Todos
+                        </button>
+                        <button
+                          onClick={async () => {
+                            if (window.confirm("Delete all notes for this page?")) {
+                              await deleteAllNotes({ pageId: page._id });
+                            }
+                          }}
+                          className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600">
+                          Clear Notes
+                        </button>
+                        {page.slug !== "default" && (
+                          <button
+                            onClick={() => {
+                              if (window.confirm("Delete this page and all its data?")) {
+                                deletePage({ id: page._id });
+                              }
+                            }}
+                            className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600">
+                            Delete
+                          </button>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <a
-                      href={`/${page.slug}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600">
-                      View
-                    </a>
+
+                  <div className="mt-4">
                     <button
-                      onClick={() => togglePageStatus({ id: page._id })}
-                      className={`px-3 py-1 rounded ${page.isActive ? "bg-yellow-500 hover:bg-yellow-600" : "bg-green-500 hover:bg-green-600"} text-white`}>
-                      {page.isActive ? "Disable" : "Enable"}
-                    </button>
-                    <button
-                      onClick={() => handleDownloadCsv(page)}
-                      className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600">
-                      Download Chat CSV
-                    </button>
-                    <button
-                      onClick={async () => {
-                        if (window.confirm("Delete all chat messages for this page?")) {
-                          await deleteAllMessages({ pageId: page._id });
+                      onClick={() => {
+                        setExpandedPages((prev) => ({
+                          ...prev,
+                          [page._id]: !prev[page._id],
+                        }));
+                        if (!activeTab[page._id]) {
+                          setActiveTab((prev) => ({
+                            ...prev,
+                            [page._id]: "messages",
+                          }));
                         }
                       }}
-                      className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600">
-                      Clear Chat
+                      className={`${textClasses} text-sm hover:underline`}>
+                      {expandedPages[page._id] ? "Hide Content" : "Show Content"}
                     </button>
-                    <button
-                      onClick={async () => {
-                        if (window.confirm("Delete all todos for this page?")) {
-                          await deleteAllTodos({ pageId: page._id });
-                        }
-                      }}
-                      className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600">
-                      Clear Todos
-                    </button>
-                    {page.slug !== "default" && (
-                      <button
-                        onClick={() => {
-                          if (window.confirm("Delete this page and all its data?")) {
-                            deletePage({ id: page._id });
+                  </div>
+
+                  {expandedPages[page._id] && (
+                    <div className="mt-4">
+                      <div className="flex gap-4 mb-4">
+                        <button
+                          onClick={() =>
+                            setActiveTab((prev) => ({ ...prev, [page._id]: "messages" }))
                           }
-                        }}
-                        className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600">
-                        Delete
-                      </button>
-                    )}
-                  </div>
+                          className={`px-3 py-1 rounded ${activeTab[page._id] === "messages" ? "bg-blue-500 text-white" : `${mutedTextClasses} hover:bg-zinc-100 dark:hover:bg-zinc-700`}`}>
+                          Messages
+                        </button>
+                        <button
+                          onClick={() => setActiveTab((prev) => ({ ...prev, [page._id]: "todos" }))}
+                          className={`px-3 py-1 rounded ${activeTab[page._id] === "todos" ? "bg-blue-500 text-white" : `${mutedTextClasses} hover:bg-zinc-100 dark:hover:bg-zinc-700`}`}>
+                          Todos
+                        </button>
+                        <button
+                          onClick={() => setActiveTab((prev) => ({ ...prev, [page._id]: "notes" }))}
+                          className={`px-3 py-1 rounded ${activeTab[page._id] === "notes" ? "bg-blue-500 text-white" : `${mutedTextClasses} hover:bg-zinc-100 dark:hover:bg-zinc-700`}`}>
+                          Notes
+                        </button>
+                      </div>
+
+                      <div className="space-y-2">
+                        {activeTab[page._id] === "messages" &&
+                          pageMessages
+                            .filter((msg) => msg.pageId === page._id)
+                            .map((message) => (
+                              <div
+                                key={message._id}
+                                className={`p-2 border rounded flex justify-between items-center ${isDark ? "border-zinc-700" : "border-zinc-200"}`}>
+                                <div>
+                                  <p>
+                                    <strong>{message.sender}</strong>: {message.text}
+                                  </p>
+                                  <p className={`text-xs ${mutedTextClasses}`}>
+                                    {new Date(message.timestamp).toLocaleString()}
+                                  </p>
+                                </div>
+                                <button
+                                  className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+                                  onClick={async () => {
+                                    if (window.confirm("Delete this message?")) {
+                                      await deleteMessage({ id: message._id });
+                                    }
+                                  }}>
+                                  Delete
+                                </button>
+                              </div>
+                            ))}
+
+                        {activeTab[page._id] === "todos" &&
+                          pageTodos
+                            .filter((todo) => todo.pageId === page._id)
+                            .map((todo) => (
+                              <div
+                                key={todo._id}
+                                className={`p-2 border rounded flex justify-between items-center ${isDark ? "border-zinc-700" : "border-zinc-200"}`}>
+                                <div>
+                                  <p>{todo.text}</p>
+                                  <p className={`text-xs ${mutedTextClasses}`}>
+                                    Completed: {todo.completed ? "Yes" : "No"}
+                                  </p>
+                                </div>
+                                <button
+                                  className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+                                  onClick={async () => {
+                                    if (window.confirm("Delete this todo?")) {
+                                      await deleteTodo({ id: todo._id });
+                                    }
+                                  }}>
+                                  Delete
+                                </button>
+                              </div>
+                            ))}
+
+                        {activeTab[page._id] === "notes" &&
+                          pageNotes
+                            .filter((note) => note.pageId === page._id)
+                            .map((note) => (
+                              <div
+                                key={note._id}
+                                className={`p-2 border rounded flex justify-between items-center ${isDark ? "border-zinc-700" : "border-zinc-200"}`}>
+                                <div>
+                                  <p className="font-medium">{note.title}</p>
+                                  <p>
+                                    {note.content.slice(0, 100)}
+                                    {note.content.length > 100 ? "..." : ""}
+                                  </p>
+                                  <p className={`text-xs ${mutedTextClasses}`}>
+                                    Last updated: {new Date(note.updatedAt).toLocaleString()}
+                                  </p>
+                                </div>
+                                <button
+                                  className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+                                  onClick={async () => {
+                                    if (window.confirm("Delete this note?")) {
+                                      await deleteNote({ id: note._id });
+                                    }
+                                  }}>
+                                  Delete
+                                </button>
+                              </div>
+                            ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

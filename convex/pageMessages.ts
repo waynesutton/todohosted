@@ -82,3 +82,20 @@ export const patchMessage = mutation({
     await ctx.db.patch(id, patch);
   },
 });
+
+export const getMessagesForCsv = mutation({
+  args: { pageId: v.id("pages") },
+  handler: async (ctx, { pageId }) => {
+    return await ctx.db
+      .query("pageMessages")
+      .filter((q) => q.eq(q.field("pageId"), pageId))
+      .collect();
+  },
+});
+
+export const getAllMessages = query({
+  args: {},
+  handler: async (ctx) => {
+    return await ctx.db.query("pageMessages").collect();
+  },
+});
