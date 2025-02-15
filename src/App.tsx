@@ -16,6 +16,8 @@ import {
   X,
   Search,
   Menu,
+  Volume2,
+  VolumeX,
 } from "lucide-react";
 import { useMutation, useQuery, useAction } from "convex/react";
 import { api } from "../convex/_generated/api";
@@ -99,6 +101,8 @@ function MainApp() {
   const [showFloatingBox, setShowFloatingBox] = useState(true);
   const [showFeaturesModal, setShowFeaturesModal] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const todos = useQuery(api.todos.get) ?? [];
   const messages = useQuery(api.messages.get) ?? [];
   const addTodo = useMutation(api.todos.add);
@@ -144,6 +148,15 @@ function MainApp() {
       setStreamedMessage(message.text);
     }
   }, [messages, streamedMessageId]);
+
+  useEffect(() => {
+    if (messages.length > 0 && !isMuted) {
+      const lastMessage = messages[0];
+      if (lastMessage) {
+        audioRef.current?.play().catch(console.error);
+      }
+    }
+  }, [messages, isMuted]);
 
   const handleSubmitTodo = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -354,6 +367,15 @@ function MainApp() {
               className={`text-xl font-normal mb-3 tracking-tighter ${iconClasses} flex items-center gap-2`}>
               Chat
               <span className="text-sm">(Public)</span>
+              <button
+                onClick={() => {
+                  setIsMuted(!isMuted);
+                  if (!isMuted) audioRef.current?.pause();
+                }}
+                className={`${iconClasses} hover:opacity-80 transition-opacity ml-2`}
+                aria-label={isMuted ? "Unmute chat sounds" : "Mute chat sounds"}>
+                {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+              </button>
             </h2>
             <div className={`${cardClasses} rounded-lg p-4 h-[500px] flex flex-col mb-6`}>
               {/* Chat Box */}
@@ -626,6 +648,11 @@ function MainApp() {
           </p>
         </div>
       </footer>
+
+      {/* Audio Element */}
+      <audio ref={audioRef} preload="auto">
+        <source src="/message.mp3" type="audio/mpeg" />
+      </audio>
     </div>
   );
 }

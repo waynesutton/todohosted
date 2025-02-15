@@ -15,6 +15,8 @@ An open source chat and reminder application built with [Convex](https://convex.
   - Search functionality for messages using vector search
   - Like messages and see like counts
   - Send emoji reactions
+  - Message sound notifications with mute control
+  - Instant muting of chat sounds
 
 - **Reminders/Todos:**
 
@@ -205,6 +207,8 @@ bun install
    - Click heart icon to like messages
    - Use emoji button for quick reactions
    - Search through message history instantly
+   - Toggle sound notifications with mute button
+   - iPhone-style message sounds for all chat messages
 
 3. **Reminder System:**
 
