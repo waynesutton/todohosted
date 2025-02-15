@@ -116,6 +116,9 @@ export const MainApp: React.FC<MainAppProps> = ({ pageId }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedMessageIds, setSelectedMessageIds] = useState<Id<"pageMessages">[]>([]);
   const [hasUserInteracted, setHasUserInteracted] = useState(false);
+  const [username, setUsername] = useState("setusername");
+  const [isEditingUsername, setIsEditingUsername] = useState(false);
+  const [tempUsername, setTempUsername] = useState("");
 
   // Ref hooks
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -172,7 +175,7 @@ export const MainApp: React.FC<MainAppProps> = ({ pageId }) => {
 
     if (newMessage.trim().startsWith("@ai")) {
       const prompt = newMessage.slice(3).trim() || "Hello! How can I help you today?";
-      await sendMessage({ text: newMessage.trim(), sender: "User", pageId });
+      await sendMessage({ text: newMessage.trim(), sender: username, pageId });
       const messageId = await askAIAction({ prompt, pageId });
       setStreamedMessageId(messageId);
       setStreamedMessage("");
@@ -180,7 +183,7 @@ export const MainApp: React.FC<MainAppProps> = ({ pageId }) => {
       const reminderText = newMessage.toLowerCase().replace("remind me", "").trim();
 
       if (reminderText) {
-        await sendMessage({ text: newMessage.trim(), sender: "User", pageId });
+        await sendMessage({ text: newMessage.trim(), sender: username, pageId });
         await addTodo({ text: reminderText, pageId });
         await sendMessage({
           text: `✅ I've added "${reminderText}" to your todo list!`,
@@ -189,7 +192,7 @@ export const MainApp: React.FC<MainAppProps> = ({ pageId }) => {
         });
       }
     } else {
-      await sendMessage({ text: newMessage.trim(), sender: "User", pageId });
+      await sendMessage({ text: newMessage.trim(), sender: username, pageId });
     }
 
     setNewMessage("");
@@ -467,6 +470,54 @@ export const MainApp: React.FC<MainAppProps> = ({ pageId }) => {
               <form onSubmit={handleSubmitMessage}>
                 <div
                   className={`${isDark ? "bg-zinc-800" : "bg-zinc-100"} rounded-lg p-4 flex items-center gap-4`}>
+                  {isEditingUsername ? (
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="text"
+                        value={tempUsername}
+                        onChange={(e) => setTempUsername(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            if (tempUsername.trim()) {
+                              setUsername(tempUsername.trim());
+                              setIsEditingUsername(false);
+                            }
+                          }
+                        }}
+                        placeholder="Enter username..."
+                        className="bg-white text-black outline-none placeholder-zinc-500 text-sm rounded px-2 py-1"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (tempUsername.trim()) {
+                            setUsername(tempUsername.trim());
+                          }
+                          setIsEditingUsername(false);
+                        }}
+                        className="text-sm bg-black text-white px-2 py-1 rounded hover:bg-zinc-800">
+                        Save
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setIsEditingUsername(false)}
+                        className="text-sm bg-white text-black px-2 py-1 rounded border border-zinc-200 hover:bg-zinc-50">
+                        Cancel
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setTempUsername(username);
+                        setIsEditingUsername(true);
+                      }}
+                      title="Click to set name"
+                      className={`text-sm ${isDark ? "text-zinc-400" : "text-zinc-600"} hover:text-blue-500 transition-colors`}>
+                      {username}
+                    </button>
+                  )}
                   <input
                     type="text"
                     value={newMessage}
