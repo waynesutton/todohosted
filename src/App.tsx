@@ -53,18 +53,18 @@ const MessageItem = ({
   return (
     <div
       className={`${isDark ? "bg-zinc-800/50" : "bg-zinc-100"} 
-        ${isSelected ? "ring-2 ring-blue-500" : ""} 
+        ${isSelected ? "ring-2 ring-[#DFE0DD]" : ""} 
         ${isThreaded ? "ml-8 border-l-2 border-zinc-300 pl-4" : ""}
-        rounded-lg p-4 mb-2 ransition-all`}>
-      <div className="flex justify-between items-start">
-        <div>
-          <div className={`${isDark ? "text-zinc-400" : "text-zinc-600"} text-xs mb-1`}>
+        rounded-lg py-1.5 px-2 mb-1 ransition-all`}>
+      <div className="flex justify-between items-center">
+        <div className="flex-1 min-w-0">
+          <div className={`${isDark ? "text-zinc-400" : "text-zinc-600"} text-xs mb-0.5`}>
             {message.sender}
           </div>
           <div className={`${textClasses} text-sm`}>{message.text}</div>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="scale-[0.4] -m-3">
+        <div className="flex items-center gap-1 ml-2 flex-shrink-0">
+          <div className="scale-[0.6] -m-2" role="presentation">
             <AnimatedHeart
               isClick={(message.likes ?? 0) > 0}
               onClick={() => toggleLike({ id: message._id })}
@@ -250,121 +250,48 @@ function MainApp() {
       {/* Content */}
       <main className={`relative flex-1 flex flex-col items-center px-4 ${bgClasses}`}>
         <div className="absolute top-0 z-[-2] h-screen w-screen bg-neutral-950 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))]"></div>
-        <div className="w-full max-w-7xl flex flex-col md:flex-row gap-6 relative items-start mt-8">
-          {/* Todo Column */}
-          <div className="flex-1">
-            <h2
-              className={`text-xl font-normal mb-3 tracking-tighter ${iconClasses} flex items-center gap-2`}>
-              Reminders
-              <span className="text-sm">(Public)</span>
-            </h2>
-            <div
-              className={`${cardClasses} rounded-lg p-4 hover:border-zinc-300 transition-colors`}>
-              <form onSubmit={handleSubmitTodo} className="mb-6">
-                <div
-                  className={`flex items-center gap-3 ${isDark ? "bg-zinc-800" : "bg-white"} rounded-lg p-3`}>
-                  <PlusCircle className="w-4 h-4" />
-                  <input
-                    type="text"
-                    value={newTodo}
-                    onChange={(e) => setNewTodo(e.target.value)}
-                    placeholder="Add a task..."
-                    className={`bg-transparent flex-1 outline-none ${isDark ? "text-zinc-100" : "text-zinc-900"} placeholder-zinc-500 focus:ring-0`}
-                  />
-                </div>
-              </form>
 
-              <div className="space-y-3">
-                {todos.map((todo) => (
-                  <div
-                    key={todo._id}
-                    className={`flex items-center gap-3 p-3 ${isDark ? "bg-zinc-800/50" : "bg-zinc-100"} rounded-lg group`}>
-                    <button
-                      onClick={() => toggleTodo({ id: todo._id })}
-                      className={`${iconClasses} hover:opacity-80 transition-colors`}>
-                      {todo.completed ? (
-                        <CheckCircle2 className="w-5 h-5" />
-                      ) : (
-                        <Circle className="w-5 h-5" />
-                      )}
-                    </button>
-                    <span
-                      className={`flex-1 ${todo.completed ? "text-zinc-500 line-through" : iconClasses}`}>
-                      {todo.text}
-                    </span>
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => upvote({ id: todo._id })}
-                        className={`${iconClasses} hover:text-green-500 transition-colors flex items-center gap-1`}>
-                        <ThumbsUp
-                          className={`w-4 h-4 ${(todo.upvotes ?? 0) > 0 ? "fill-green-500 text-green-500" : ""}`}
-                        />
-                        {(todo.upvotes ?? 0) > 0 && <span className="text-sm">{todo.upvotes}</span>}
-                      </button>
-                      <button
-                        onClick={() => downvote({ id: todo._id })}
-                        className={`${iconClasses} hover:text-red-500 transition-colors flex items-center gap-1`}>
-                        <ThumbsDown
-                          className={`w-4 h-4 ${(todo.downvotes ?? 0) > 0 ? "fill-red-500 text-red-500" : ""}`}
-                        />
-                        {(todo.downvotes ?? 0) > 0 && (
-                          <span className="text-sm">{todo.downvotes}</span>
-                        )}
-                      </button>
-                      <button
-                        onClick={() => deleteTodo({ id: todo._id })}
-                        className={`opacity-0 group-hover:opacity-100 ${iconClasses} hover:text-red-400 transition-all`}>
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                ))}
+        {/* Features Modal */}
+        {showFeaturesModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className={`${cardClasses} max-w-2xl w-full mx-4 p-6 rounded-lg`}>
+              <div className="flex justify-between items-center mb-4">
+                <h2 className={`text-xl font-normal tracking-tighter ${iconClasses}`}>
+                  Demo Features
+                </h2>
+                <button
+                  onClick={() => setShowFeaturesModal(false)}
+                  className={`${iconClasses} hover:text-gray-300 transition-colors`}>
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+              <div className={`${textClasses}`}>
+                <p className="text-sm font-medium mb-2">Real-time Chat:</p>
+                <ul className="list-disc pl-5 mb-4">
+                  <li className="text-sm">Send and receive chat messages instantly</li>
+                  <li className="text-sm">AI-powered chat responses using "@ai" command</li>
+                  <li className="text-sm">Real-time message streaming from OpenAI</li>
+                  <li className="text-sm">Create reminders by typing "remind me" in chat</li>
+                  <li className="text-sm">Search functionality for messages using vector search</li>
+                  <li className="text-sm">Like messages and see like counts</li>
+                  <li className="text-sm">Send emoji reactions</li>
+                </ul>
+                <p className="text-sm font-medium mb-2">Reminders/Todos:</p>
+                <ul className="list-disc pl-5">
+                  <li className="text-sm">Create and manage public reminders</li>
+                  <li className="text-sm">Toggle completion status</li>
+                  <li className="text-sm">Upvote and downvote reminders</li>
+                  <li className="text-sm">Real-time updates across all connected clients</li>
+                  <li className="text-sm">Delete reminders with hover controls</li>
+                </ul>
               </div>
             </div>
           </div>
+        )}
 
-          {/* Features Modal */}
-          {showFeaturesModal && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-              <div className={`${cardClasses} max-w-2xl w-full mx-4 p-6 rounded-lg`}>
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className={`text-xl font-normal tracking-tighter ${iconClasses}`}>
-                    Demo Features
-                  </h2>
-                  <button
-                    onClick={() => setShowFeaturesModal(false)}
-                    className={`${iconClasses} hover:text-gray-300 transition-colors`}>
-                    <X className="w-6 h-6" />
-                  </button>
-                </div>
-                <div className={`${textClasses}`}>
-                  <p className="text-sm font-medium mb-2">Real-time Chat:</p>
-                  <ul className="list-disc pl-5 mb-4">
-                    <li className="text-sm">Send and receive chat messages instantly</li>
-                    <li className="text-sm">AI-powered chat responses using "@ai" command</li>
-                    <li className="text-sm">Real-time message streaming from OpenAI</li>
-                    <li className="text-sm">Create reminders by typing "remind me" in chat</li>
-                    <li className="text-sm">
-                      Search functionality for messages using vector search
-                    </li>
-                    <li className="text-sm">Like messages and see like counts</li>
-                    <li className="text-sm">Send emoji reactions</li>
-                  </ul>
-                  <p className="text-sm font-medium mb-2">Reminders/Todos:</p>
-                  <ul className="list-disc pl-5">
-                    <li className="text-sm">Create and manage public reminders</li>
-                    <li className="text-sm">Toggle completion status</li>
-                    <li className="text-sm">Upvote and downvote reminders</li>
-                    <li className="text-sm">Real-time updates across all connected clients</li>
-                    <li className="text-sm">Delete reminders with hover controls</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          )}
-
+        <div className="w-full max-w-7xl flex flex-col md:flex-row gap-6 relative items-start mt-8">
           {/* Chat Column */}
-          <div className="flex-1">
+          <div className="flex-[2]">
             <h2
               className={`text-xl font-normal mb-3 tracking-tighter ${iconClasses} flex items-center gap-2`}>
               Chat
@@ -501,6 +428,78 @@ function MainApp() {
                   </div>
                 </div>
               )}
+            </div>
+          </div>
+
+          {/* Todo Column */}
+          <div className="flex-1">
+            <h2
+              className={`text-xl font-normal mb-3 tracking-tighter ${iconClasses} flex items-center gap-2`}>
+              Reminders
+              <span className="text-sm">(Public)</span>
+            </h2>
+            <div
+              className={`${cardClasses} rounded-lg p-4 hover:border-zinc-300 transition-colors`}>
+              <form onSubmit={handleSubmitTodo} className="mb-6">
+                <div
+                  className={`flex items-center gap-3 ${isDark ? "bg-zinc-800" : "bg-white"} rounded-lg p-3`}>
+                  <PlusCircle className="w-4 h-4" />
+                  <input
+                    type="text"
+                    value={newTodo}
+                    onChange={(e) => setNewTodo(e.target.value)}
+                    placeholder="Add a task..."
+                    className={`bg-transparent flex-1 outline-none ${isDark ? "text-zinc-100" : "text-zinc-900"} placeholder-zinc-500 focus:ring-0`}
+                  />
+                </div>
+              </form>
+
+              <div className="space-y-3">
+                {todos.map((todo) => (
+                  <div
+                    key={todo._id}
+                    className={`flex items-center gap-3 p-3 ${isDark ? "bg-zinc-800/50" : "bg-zinc-100"} rounded-lg group`}>
+                    <button
+                      onClick={() => toggleTodo({ id: todo._id })}
+                      className={`${iconClasses} hover:opacity-80 transition-colors`}>
+                      {todo.completed ? (
+                        <CheckCircle2 className="w-5 h-5" />
+                      ) : (
+                        <Circle className="w-5 h-5" />
+                      )}
+                    </button>
+                    <span
+                      className={`flex-1 ${todo.completed ? "text-zinc-500 line-through" : iconClasses}`}>
+                      {todo.text}
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => upvote({ id: todo._id })}
+                        className={`${iconClasses} hover:text-green-500 transition-colors flex items-center gap-1`}>
+                        <ThumbsUp
+                          className={`w-4 h-4 ${(todo.upvotes ?? 0) > 0 ? "fill-green-500 text-green-500" : ""}`}
+                        />
+                        {(todo.upvotes ?? 0) > 0 && <span className="text-sm">{todo.upvotes}</span>}
+                      </button>
+                      <button
+                        onClick={() => downvote({ id: todo._id })}
+                        className={`${iconClasses} hover:text-red-500 transition-colors flex items-center gap-1`}>
+                        <ThumbsDown
+                          className={`w-4 h-4 ${(todo.downvotes ?? 0) > 0 ? "fill-red-500 text-red-500" : ""}`}
+                        />
+                        {(todo.downvotes ?? 0) > 0 && (
+                          <span className="text-sm">{todo.downvotes}</span>
+                        )}
+                      </button>
+                      <button
+                        onClick={() => deleteTodo({ id: todo._id })}
+                        className={`opacity-0 group-hover:opacity-100 ${iconClasses} hover:text-red-400 transition-all`}>
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
