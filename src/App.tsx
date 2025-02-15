@@ -15,6 +15,7 @@ import {
   ThumbsDown,
   X,
   Search,
+  Menu,
 } from "lucide-react";
 import { useMutation, useQuery, useAction } from "convex/react";
 import { api } from "../convex/_generated/api";
@@ -95,6 +96,7 @@ function MainApp() {
   const [isDark, setIsDark] = useState(false);
   const [showFloatingBox, setShowFloatingBox] = useState(true);
   const [showFeaturesModal, setShowFeaturesModal] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
   const todos = useQuery(api.todos.get) ?? [];
   const messages = useQuery(api.messages.get) ?? [];
   const addTodo = useMutation(api.todos.add);
@@ -192,9 +194,15 @@ function MainApp() {
       {/* Header */}
       <header className="relative w-full py-6 px-4">
         <div className="max-w-7xl mx-auto flex justify-between items-center font-['Inter']">
+          {/* Mobile Menu Button */}
+          <button onClick={() => setShowMobileMenu(!showMobileMenu)} className="md:hidden">
+            <Menu className={`w-6 h-6 ${iconClasses}`} />
+          </button>
+
+          {/* Logo and Title */}
           <h1
-            className={`${iconClasses} text-xl font-normal flex flex-col md:flex-row items-center gap-2`}>
-            <a href="/" target="_blank" rel="noopener noreferrer">
+            className={`${iconClasses} text-xl font-normal flex flex-col md:flex-row items-center gap-2 flex-1 justify-center md:justify-start`}>
+            <a href="/" target="_blank" rel="noopener noreferrer" className="md:flex">
               <img
                 src={isDark ? "/convex-logo-white.svg" : "/convex-logo-black.svg"}
                 alt="Convex Logo"
@@ -209,7 +217,9 @@ function MainApp() {
               Sync + AI Chat Demo
             </a>
           </h1>
-          <div className="flex items-center gap-6">
+
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center gap-6">
             <a
               href="https://convex.link/chatsynclinks"
               target="_blank"
@@ -217,7 +227,6 @@ function MainApp() {
               className={`${iconClasses} hover:opacity-80 transition-opacity`}>
               Convex
             </a>
-
             <a
               href="https://docs.convex.dev"
               target="_blank"
@@ -244,7 +253,54 @@ function MainApp() {
             </button>
             {user && user.publicMetadata?.role !== "admin" && <UserButton />}
           </div>
+
+          {/* Mobile Icons */}
+          <div className="flex md:hidden items-center gap-4">
+            <button
+              onClick={() => setIsDark(!isDark)}
+              className={`${iconClasses} hover:opacity-80 transition-opacity`}>
+              {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+            </button>
+            {user && user.publicMetadata?.role !== "admin" && <UserButton />}
+          </div>
         </div>
+
+        {/* Mobile Navigation Menu */}
+        {showMobileMenu && (
+          <div className="md:hidden absolute top-full left-0 right-0 bg-white dark:bg-zinc-900 border-t border-zinc-200 dark:border-zinc-800 py-4 px-4 z-50">
+            <div className="flex flex-col gap-4">
+              <a
+                href="https://convex.link/chatsynclinks"
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`${iconClasses} hover:opacity-80 transition-opacity`}>
+                Convex
+              </a>
+              <a
+                href="https://docs.convex.dev"
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`${iconClasses} hover:opacity-80 transition-opacity`}>
+                Docs
+              </a>
+              <a
+                href="https://stack.convex.dev/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`${iconClasses} hover:opacity-80 transition-opacity`}>
+                Blog
+              </a>
+              <button
+                onClick={() => {
+                  setShowFeaturesModal(true);
+                  setShowMobileMenu(false);
+                }}
+                className={`${iconClasses} hover:opacity-80 transition-opacity text-left`}>
+                About
+              </button>
+            </div>
+          </div>
+        )}
       </header>
 
       {/* Content */}
