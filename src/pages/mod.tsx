@@ -6,13 +6,10 @@ import NotFound from "./NotFound";
 import { Menu, Sun, Moon, X } from "lucide-react";
 
 const AdminDashboard = () => {
+  // User and auth hooks
   const { user } = useUser();
-  const pages = useQuery(api.pages.getPages) ?? [];
-  const createPage = useMutation(api.pages.createPage);
-  const deletePage = useMutation(api.pages.deletePage);
-  const togglePageStatus = useMutation(api.pages.togglePageStatus);
-  const deleteAllMessages = useMutation(api.pageMessages.deleteAllMessages);
-  const deleteAllTodos = useMutation(api.todos.deleteAllTodos);
+
+  // State hooks
   const [newPageSlug, setNewPageSlug] = useState("");
   const [newPageTitle, setNewPageTitle] = useState("");
   const [isDark, setIsDark] = useState(() => {
@@ -24,17 +21,27 @@ const AdminDashboard = () => {
   });
   const [showMobileMenu, setShowMobileMenu] = useState(false);
 
+  // Query hooks
+  const pages = useQuery(api.pages.getPages) ?? [];
   const defaultPage = useQuery(api.pages.getPageBySlug, { slug: "default" });
   const messages = defaultPage
     ? (useQuery(api.pageMessages.getMessages, { pageId: defaultPage._id }) ?? [])
     : [];
   const todos = defaultPage ? (useQuery(api.todos.get, { pageId: defaultPage._id }) ?? []) : [];
 
+  // Mutation hooks
+  const createPage = useMutation(api.pages.createPage);
+  const deletePage = useMutation(api.pages.deletePage);
+  const togglePageStatus = useMutation(api.pages.togglePageStatus);
+  const deleteAllMessages = useMutation(api.pageMessages.deleteAllMessages);
+  const deleteAllTodos = useMutation(api.todos.deleteAllTodos);
   const deleteMessage = useMutation(api.pageMessages.deleteMessage);
   const deleteTodo = useMutation(api.todos.remove);
   const sendPageMessage = useMutation(api.pageMessages.send);
   const toggleLike = useMutation(api.pageMessages.toggleLike);
+  const getMessages = useMutation(api.pageMessages.getMessages);
 
+  // Effect hooks
   React.useEffect(() => {
     if (typeof window !== "undefined") {
       localStorage.setItem("adminDarkMode", JSON.stringify(isDark));
@@ -67,19 +74,40 @@ const AdminDashboard = () => {
       if (pageId) {
         setNewPageSlug("");
         setNewPageTitle("");
-        // Add initial message to the new page
         await sendPageMessage({
           pageId,
           text: `Welcome to ${newPageTitle.trim()}!`,
           sender: "System",
         });
-        // Redirect to the new page
         window.location.href = `/${newPageSlug.trim()}`;
       }
     } catch (error) {
       console.error("Failed to create page:", error);
       alert("Failed to create page. The URL might already be in use.");
     }
+  };
+
+  const handleDownloadCsv = async (page: { _id: string; slug: string }) => {
+    const pageMessages = await getMessages({ pageId: page._id });
+    const csvContent = [
+      ["Timestamp", "Sender", "Message", "Likes"].join(","),
+      ...pageMessages.map((msg) =>
+        [
+          new Date(msg.timestamp).toLocaleString(),
+          msg.sender,
+          `"${msg.text.replace(/"/g, '""')}"`,
+          msg.likes ?? 0,
+        ].join(",")
+      ),
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${page.slug}-chat-messages.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
   };
 
   return (
@@ -204,28 +232,7 @@ const AdminDashboard = () => {
                       {page.isActive ? "Disable" : "Enable"}
                     </button>
                     <button
-                      onClick={async () => {
-                        const messages = await api.pageMessages.getMessages({ pageId: page._id });
-                        const csvContent = [
-                          ["Timestamp", "Sender", "Message", "Likes"].join(","),
-                          ...messages.map((msg) =>
-                            [
-                              new Date(msg.timestamp).toLocaleString(),
-                              msg.sender,
-                              `"${msg.text.replace(/"/g, '""')}"`,
-                              msg.likes ?? 0,
-                            ].join(",")
-                          ),
-                        ].join("\n");
-
-                        const blob = new Blob([csvContent], { type: "text/csv" });
-                        const url = window.URL.createObjectURL(blob);
-                        const a = document.createElement("a");
-                        a.href = url;
-                        a.download = `${page.slug}-chat-messages.csv`;
-                        a.click();
-                        window.URL.revokeObjectURL(url);
-                      }}
+                      onClick={() => handleDownloadCsv(page)}
                       className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600">
                       Download Chat CSV
                     </button>
