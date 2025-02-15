@@ -25,6 +25,7 @@ import AdminPage from "./pages/admin";
 import type { Id } from "../convex/_generated/dataModel";
 import { useUser, UserButton } from "@clerk/clerk-react";
 import AnimatedHeart from "react-animated-heart";
+import AboutPage from "./pages/about";
 
 const HAPPY_EMOJIS = ["😊", "😄", "🎉", "✨", "🌟"];
 
@@ -85,6 +86,7 @@ function App() {
         <Route path="/" element={<MainApp />} />
         <Route path="/admin" element={<AdminPage />} />
         <Route path="/mod" element={<ModPage />} />
+        <Route path="/about" element={<AboutPage />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>
