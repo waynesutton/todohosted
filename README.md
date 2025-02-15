@@ -9,6 +9,7 @@ An open source chat and reminder application built with [Convex](https://convex.
 - **Real-time Chat:**
 
   - Send and receive chat messages instantly
+  - Set and customize your username at any time
   - AI-powered chat responses using "@ai" command
   - Real-time message streaming from OpenAI
   - Create reminders by typing "remind me" in chat
@@ -17,6 +18,8 @@ An open source chat and reminder application built with [Convex](https://convex.
   - Send emoji reactions
   - Message sound notifications with mute control
   - Instant muting of chat sounds
+  - Dark/Light mode support
+  - Threaded AI responses
 
 - **Reminders/Todos:**
 
@@ -25,6 +28,7 @@ An open source chat and reminder application built with [Convex](https://convex.
   - Upvote and downvote reminders
   - Real-time updates across all connected clients
   - Delete reminders with hover controls
+  - Create todos directly from chat using "remind me"
 
 - **Admin Dashboard:**
 
@@ -32,11 +36,20 @@ An open source chat and reminder application built with [Convex](https://convex.
   - Sign in using Clerk to manage your profile
   - View and delete individual or all chat messages
   - Manage all reminders from one place
+  - Download chat history as CSV
+  - Create and manage multiple chat rooms
+  - Enable/disable chat rooms
+  - View message and reminder statistics
 
-- **Dark/Light Mode:**
-  - Toggle between dark and light themes
-  - Persists across sessions
-  - Beautiful UI transitions
+- **User Experience:**
+  - Customizable username setting
+  - Dark/Light mode toggle
+  - Mobile-responsive design
+  - Sound notifications with mute option
+  - Real-time message streaming
+  - Instant search results
+  - Beautiful UI with smooth transitions
+  - Hover tooltips for better UX
 
 ## Stack
 
