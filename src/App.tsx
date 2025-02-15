@@ -213,8 +213,8 @@ function MainApp() {
               href="https://convex.link/chatsynclinks"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm md:text-xl">
-              Sync + AI Chat Demo
+              className="text-sm md:text-lg">
+              AI Chat & ToDo List Sync App
             </a>
           </h1>
 
@@ -491,7 +491,7 @@ function MainApp() {
           <div className="flex-1">
             <h2
               className={`text-xl font-normal mb-3 tracking-tighter ${iconClasses} flex items-center gap-2`}>
-              Reminders
+              ToDo List
               <span className="text-sm">(Public)</span>
             </h2>
             <div
@@ -602,7 +602,7 @@ function MainApp() {
               Convex Cron Jobs
             </a>
           </p>
-          <p className={`${iconClasses} text-sm`}>
+          <p className={`${iconClasses} text-sm flex items-center justify-center gap-1`}>
             Open Source and built with ❤️ at{" "}
             <a
               href="https://convex.link/chatsynclinks"
@@ -611,20 +611,14 @@ function MainApp() {
               className="hover:opacity-80 transition-opacity">
               Convex
             </a>
-            . Powered by{" "}
-            <a
-              href="https://convex.link/chatsynclinks"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:opacity-80 transition-opacity">
-              Convex
-            </a>
-            . The source code is available on{" "}
+            .{" "}
             <a
               href="https://github.com/waynesutton/todohosted"
               target="_blank"
-              rel="noopener noreferrer">
-              GitHub
+              rel="noopener noreferrer"
+              className="hover:opacity-80 transition-opacity flex items-center gap-1">
+              <Github className="w-4 h-4" />
+              The source code is available on GitHub
             </a>
             .
           </p>

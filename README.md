@@ -1,4 +1,4 @@
-# Convex Realtime Chat & Reminders with AI Demo Sync App
+# Realtime AI Chat & ToDo List Sync App on Convex
 
 An open source chat and reminder application built with [Convex](https://convex.link/chatsynclinks), Clerk, and React. This application features real-time chat, task management, and an administrative dashboard for moderation.
 
