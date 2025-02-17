@@ -276,16 +276,27 @@ export const MainApp: React.FC<MainAppProps> = ({ pageId }) => {
   }, [messages, streamedMessageId]);
 
   useEffect(() => {
-    if (messages && messages.length > 0 && !isMuted) {
+    if (messages && messages.length > 0 && !isMuted && hasUserInteracted) {
       const lastMessage = messages[0];
       if (lastMessage) {
         audioRef.current?.play().catch(console.error);
       }
     }
-  }, [messages, isMuted]);
+  }, [messages, isMuted, hasUserInteracted]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (showMobileMenu) {
+        setShowMobileMenu(false);
+      }
+    };
+
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
+  }, [showMobileMenu]);
 
   // Memoized values
-  const iconClasses = isDark ? "text-zinc-400" : "text-zinc-600";
+  const iconClasses = isDark ? "text-white" : "text-zinc-600";
   const cardClasses = isDark ? "bg-zinc-900" : "bg-white";
   const textClasses = isDark ? "text-zinc-400" : "text-zinc-600";
   const bgClasses = isDark ? "bg-slate-950" : "bg-white";
@@ -483,10 +494,15 @@ export const MainApp: React.FC<MainAppProps> = ({ pageId }) => {
       </div>
 
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 w-full py-6 px-4 z-50 bg-white dark:bg-black">
+      <header className="w-full py-6 px-4 bg-white dark:bg-black">
         <div className="max-w-7xl mx-auto flex justify-between items-center font-['Inter']">
           {/* Mobile Menu Button */}
-          <button onClick={() => setShowMobileMenu(!showMobileMenu)} className="md:hidden">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowMobileMenu(!showMobileMenu);
+            }}
+            className="md:hidden">
             <Menu className={`w-6 h-6 ${iconClasses}`} />
           </button>
 
@@ -589,28 +605,11 @@ export const MainApp: React.FC<MainAppProps> = ({ pageId }) => {
               className={`${iconClasses} hover:opacity-80 transition-opacity`}>
               About
             </button>
-            <button
-              onClick={() => setIsDark(!isDark)}
-              className={`${iconClasses} hover:opacity-80 transition-opacity`}>
-              {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-            </button>
             {user && user.publicMetadata?.role !== "admin" && <UserButton />}
           </div>
 
           {/* Mobile Icons */}
           <div className="flex md:hidden items-center gap-4">
-            {/* Add Mobile Search Button */}
-            <button
-              onClick={() => setShowMobileMenu(!showMobileMenu)}
-              className={`${iconClasses} hover:opacity-80 transition-opacity`}>
-              <Search className="w-5 h-5" />
-            </button>
-
-            <button
-              onClick={() => setIsDark(!isDark)}
-              className={`${iconClasses} hover:opacity-80 transition-opacity`}>
-              {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-            </button>
             {user && user.publicMetadata?.role !== "admin" && <UserButton />}
           </div>
         </div>
@@ -642,6 +641,7 @@ export const MainApp: React.FC<MainAppProps> = ({ pageId }) => {
                     onClick={() => {
                       setSearchQuery("");
                       setSelectedMessageIds([]);
+                      setShowMobileMenu(false);
                     }}
                     className={`${isDark ? "text-zinc-400" : "text-zinc-600"} hover:text-red-500 transition-colors`}>
                     <X className="w-4 h-4" />
@@ -685,14 +685,14 @@ export const MainApp: React.FC<MainAppProps> = ({ pageId }) => {
       </header>
 
       {/* Main Content */}
-      <main className={`relative flex-1 flex flex-col items-center px-4 ${bgClasses} mt-24`}>
+      <main className={`relative flex-1 flex flex-col items-center px-4 ${bgClasses} mt-0`}>
         <div className="absolute top-0 z-[-2] h-screen w-screen bg-neutral-950 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))]"></div>
 
         <div className="w-full max-w-7xl flex flex-col gap-6 relative items-start mt-8">
           {/* Top Section - Chat and Todo */}
-          <div className="w-full flex gap-6">
-            {/* Chat Column - 2/3 width */}
-            <div className="flex-[2]">
+          <div className="w-full flex flex-col md:flex-row gap-6">
+            {/* Chat Column - Full width on mobile, 2/3 on desktop */}
+            <div className="w-full md:flex-[2]">
               <h2
                 className={`text-xl font-normal mb-3 tracking-tighter ${iconClasses} flex items-center gap-2`}>
                 Chat
