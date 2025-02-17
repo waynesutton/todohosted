@@ -10,7 +10,7 @@ crons.daily(
     hourUTC: 8, // 1:00 AM PT = 8:00 AM UTC
     minuteUTC: 0,
   },
-  internal.cleanup.clearAllData,
+  internal.cleanup.clearAllData
 );
 
-export default crons; 
+export default crons;

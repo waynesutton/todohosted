@@ -21,6 +21,8 @@ import {
   Copy,
   Edit2,
   Save,
+  ChevronUp,
+  ChevronDown,
 } from "lucide-react";
 import { useMutation, useQuery, useAction } from "convex/react";
 import { api } from "../convex/_generated/api";
@@ -71,110 +73,117 @@ const MessageItem = ({
   };
 
   return (
-    <div
-      className={`${isDark ? "bg-zinc-800/50" : "bg-zinc-100"} 
-        ${isSelected ? "ring-2 ring-[#DFE0DD]" : ""} 
-        ${isThreaded ? "ml-8 border-l-2 border-zinc-300 pl-4" : ""}
-        rounded-lg py-1.5 px-2 mb-1 transition-all`}>
-      <div className="flex justify-between items-start">
-        <div className="flex-1 min-w-0">
-          <div className={`${isDark ? "text-zinc-400" : "text-zinc-600"} text-xs mb-0.5`}>
-            {message.sender || "Anonymous"}
-          </div>
-          <div className={`${textClasses} text-sm text-left`}>
-            <ReactMarkdown
-              components={{
-                h1: ({ children }) => <h1 className="text-2xl font-bold mb-2">{children}</h1>,
-                h2: ({ children }) => <h2 className="text-xl font-bold mb-2">{children}</h2>,
-                h3: ({ children }) => <h3 className="text-lg font-bold mb-2">{children}</h3>,
-                h4: ({ children }) => <h4 className="text-base font-bold mb-2">{children}</h4>,
-                h5: ({ children }) => <h5 className="text-sm font-bold mb-2">{children}</h5>,
-                h6: ({ children }) => <h6 className="text-xs font-bold mb-2">{children}</h6>,
-                p: ({ children }) => <p className="mb-2">{children}</p>,
-                ul: ({ children }) => <ul className="list-disc pl-4 mb-2">{children}</ul>,
-                ol: ({ children }) => <ol className="list-decimal pl-4 mb-2">{children}</ol>,
-                li: ({ children }) => <li className="mb-1">{children}</li>,
-                blockquote: ({ children }) => (
-                  <blockquote className="border-l-4 border-gray-300 pl-4 italic mb-2">
-                    {children}
-                  </blockquote>
-                ),
-                a: ({ href, children }) => (
-                  <a
-                    href={href}
-                    className="text-blue-500 hover:underline"
-                    target="_blank"
-                    rel="noopener noreferrer">
-                    {children}
-                  </a>
-                ),
-                strong: ({ children }) => <strong className="font-bold">{children}</strong>,
-                em: ({ children }) => <em className="italic">{children}</em>,
-                code({ inline, className, children, ...props }) {
-                  const match = /language-(\w+)/.exec(className || "");
-                  const code = String(children).replace(/\n$/, "");
+    <div id={`message-${message._id}`} className="flex flex-col w-full">
+      <div className="flex items-start gap-2 mb-4">
+        <div className="flex-1 max-w-[97%]">
+          <div
+            className={`${isSelected ? "bg-[#551D49] text-white" : isDark ? "bg-zinc-800/50" : "bg-black"} 
+              ${isThreaded ? "ml-8 border-l-2 border-zinc-300 pl-4" : ""}
+              rounded-2xl py-2 px-3 inline-block`}>
+            <div className="flex flex-col">
+              <div
+                className={`${isSelected ? "text-zinc-200" : isDark ? "text-zinc-400" : "text-white"} text-xs mb-0.5`}>
+                {message.sender || "Anonymous"}
+              </div>
+              <div
+                className={`${isSelected ? "text-white" : isDark ? textClasses : "text-white"} text-sm`}>
+                <ReactMarkdown
+                  components={{
+                    h1: ({ children }) => <h1 className="text-2xl font-bold mb-2">{children}</h1>,
+                    h2: ({ children }) => <h2 className="text-xl font-bold mb-2">{children}</h2>,
+                    h3: ({ children }) => <h3 className="text-lg font-bold mb-2">{children}</h3>,
+                    h4: ({ children }) => <h4 className="text-base font-bold mb-2">{children}</h4>,
+                    h5: ({ children }) => <h5 className="text-sm font-bold mb-2">{children}</h5>,
+                    h6: ({ children }) => <h6 className="text-xs font-bold mb-2">{children}</h6>,
+                    p: ({ children }) => <p className="mb-2">{children}</p>,
+                    ul: ({ children }) => <ul className="list-disc pl-4 mb-2">{children}</ul>,
+                    ol: ({ children }) => <ol className="list-decimal pl-4 mb-2">{children}</ol>,
+                    li: ({ children }) => <li className="mb-1">{children}</li>,
+                    blockquote: ({ children }) => (
+                      <blockquote className="border-l-4 border-gray-300 pl-4 italic mb-2">
+                        {children}
+                      </blockquote>
+                    ),
+                    a: ({ href, children }) => (
+                      <a
+                        href={href}
+                        className="text-blue-500 hover:underline"
+                        target="_blank"
+                        rel="noopener noreferrer">
+                        {children}
+                      </a>
+                    ),
+                    strong: ({ children }) => <strong className="font-bold">{children}</strong>,
+                    em: ({ children }) => <em className="italic">{children}</em>,
+                    code({ inline, className, children, ...props }) {
+                      const match = /language-(\w+)/.exec(className || "");
+                      const code = String(children).replace(/\n$/, "");
 
-                  if (!inline && match) {
-                    return (
-                      <div className="relative">
-                        <div className="flex justify-between items-center bg-zinc-700 text-zinc-300 px-4 py-1 text-xs rounded-t">
-                          <span>{match[1].toUpperCase()}</span>
-                          <button
-                            onClick={() => copyCode(code)}
-                            className="hover:text-white transition-colors">
-                            {copied ? "Copied!" : <Copy className="w-4 h-4" />}
-                          </button>
+                      if (!inline && match) {
+                        return (
+                          <div className="relative">
+                            <div className="flex justify-between items-center bg-zinc-700 text-zinc-300 px-4 py-1 text-xs rounded-t">
+                              <span>{match[1].toUpperCase()}</span>
+                              <button
+                                onClick={() => copyCode(code)}
+                                className="hover:text-white transition-colors">
+                                {copied ? "Copied!" : <Copy className="w-4 h-4" />}
+                              </button>
+                            </div>
+                            <SyntaxHighlighter
+                              language={match[1]}
+                              style={isDark ? oneDark : oneLight}
+                              customStyle={{
+                                margin: 0,
+                                borderTopLeftRadius: 0,
+                                borderTopRightRadius: 0,
+                              }}>
+                              {code}
+                            </SyntaxHighlighter>
+                          </div>
+                        );
+                      }
+
+                      return inline ? (
+                        <code
+                          className="bg-zinc-200 dark:bg-zinc-700 px-1 py-0.5 rounded"
+                          {...props}>
+                          {children}
+                        </code>
+                      ) : (
+                        <div className="relative">
+                          <div className="flex justify-between items-center bg-zinc-700 text-zinc-300 px-4 py-1 text-xs rounded-t">
+                            <span>CODE</span>
+                            <button
+                              onClick={() => copyCode(code)}
+                              className="hover:text-white transition-colors">
+                              {copied ? "Copied!" : <Copy className="w-4 h-4" />}
+                            </button>
+                          </div>
+                          <SyntaxHighlighter
+                            language="plaintext"
+                            style={isDark ? oneDark : oneLight}
+                            customStyle={{
+                              margin: 0,
+                              borderTopLeftRadius: 0,
+                              borderTopRightRadius: 0,
+                            }}>
+                            {code}
+                          </SyntaxHighlighter>
                         </div>
-                        <SyntaxHighlighter
-                          language={match[1]}
-                          style={isDark ? oneDark : oneLight}
-                          customStyle={{
-                            margin: 0,
-                            borderTopLeftRadius: 0,
-                            borderTopRightRadius: 0,
-                          }}>
-                          {code}
-                        </SyntaxHighlighter>
-                      </div>
-                    );
-                  }
-
-                  return inline ? (
-                    <code className="bg-zinc-200 dark:bg-zinc-700 px-1 py-0.5 rounded" {...props}>
-                      {children}
-                    </code>
-                  ) : (
-                    <div className="relative">
-                      <div className="flex justify-between items-center bg-zinc-700 text-zinc-300 px-4 py-1 text-xs rounded-t">
-                        <span>CODE</span>
-                        <button
-                          onClick={() => copyCode(code)}
-                          className="hover:text-white transition-colors">
-                          {copied ? "Copied!" : <Copy className="w-4 h-4" />}
-                        </button>
-                      </div>
-                      <SyntaxHighlighter
-                        language="plaintext"
-                        style={isDark ? oneDark : oneLight}
-                        customStyle={{
-                          margin: 0,
-                          borderTopLeftRadius: 0,
-                          borderTopRightRadius: 0,
-                        }}>
-                        {code}
-                      </SyntaxHighlighter>
-                    </div>
-                  );
-                },
-              }}>
-              {message.text}
-            </ReactMarkdown>
+                      );
+                    },
+                  }}>
+                  {message.text}
+                </ReactMarkdown>
+              </div>
+            </div>
           </div>
         </div>
-        <div className="flex items-center gap-1 ml-2 flex-shrink-0">
+        <div className="flex items-center gap-1 mr-5">
           <button
             onClick={() => toggleLike({ id: message._id })}
-            className={`hover:scale-110 transition-transform pr-[10px] ${hasLikes ? "text-red-500" : isDark ? "text-zinc-400" : "text-zinc-600"}`}>
+            className={`hover:scale-110 transition-transform ${hasLikes ? "text-red-500" : isDark ? "text-zinc-400" : "text-zinc-600"}`}>
             <Heart className="w-4 h-4" fill={hasLikes ? "currentColor" : "none"} />
           </button>
           {hasLikes && <span className="text-sm text-red-500">{message.likes}</span>}
@@ -215,6 +224,13 @@ export const MainApp: React.FC<MainAppProps> = ({ pageId }) => {
   const [showFloatingBox, setShowFloatingBox] = useState(true);
   const [showFeaturesModal, setShowFeaturesModal] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [showWarning, setShowWarning] = useState(false);
+  const [hasShownWarning, setHasShownWarning] = useState(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("hasShownWarning") === "true";
+    }
+    return false;
+  });
   const [isMuted, setIsMuted] = useState(false);
   const [newTodo, setNewTodo] = useState("");
   const [newMessage, setNewMessage] = useState("");
@@ -231,6 +247,7 @@ export const MainApp: React.FC<MainAppProps> = ({ pageId }) => {
   const [noteTitle, setNoteTitle] = useState("");
   const [noteContent, setNoteContent] = useState("");
   const [copiedNoteId, setCopiedNoteId] = useState<Id<"pageNotes"> | null>(null);
+  const [expandedNotes, setExpandedNotes] = useState<Record<Id<"pageNotes">, boolean>>({});
 
   // Ref hooks
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -269,10 +286,11 @@ export const MainApp: React.FC<MainAppProps> = ({ pageId }) => {
 
   // Memoized values
   const iconClasses = isDark ? "text-zinc-400" : "text-zinc-600";
-  const cardClasses = isDark ? "bg-zinc-900" : "bg-white border border-zinc-200 shadow-sm";
+  const cardClasses = isDark ? "bg-zinc-900" : "bg-white";
   const textClasses = isDark ? "text-zinc-400" : "text-zinc-600";
-  const bgClasses = isDark ? "bg-slate-950" : "bg-[#F5F5F4]";
+  const bgClasses = isDark ? "bg-slate-950" : "bg-white";
   const mutedTextClasses = isDark ? "text-zinc-500" : "text-zinc-500";
+  const inputBgClasses = isDark ? "bg-zinc-800" : "bg-white border border-zinc-200";
 
   // Event handlers
   const handleSubmitTodo = async (e: React.FormEvent) => {
@@ -284,6 +302,10 @@ export const MainApp: React.FC<MainAppProps> = ({ pageId }) => {
 
   const handleSubmitMessage = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!hasShownWarning) {
+      setShowWarning(true);
+      return;
+    }
     if (!newMessage.trim() || !pageId) return;
 
     if (newMessage.trim().startsWith("@ai")) {
@@ -300,6 +322,21 @@ export const MainApp: React.FC<MainAppProps> = ({ pageId }) => {
         await addTodo({ text: reminderText, pageId });
         await sendMessage({
           text: `✅ I've added "${reminderText}" to your todo list!`,
+          sender: "System",
+          pageId,
+        });
+      }
+    } else if (newMessage.trim().toLowerCase().startsWith("note:")) {
+      const noteText = newMessage.slice(5).trim();
+      if (noteText) {
+        await sendMessage({ text: newMessage.trim(), sender: username, pageId });
+        await createNote({
+          pageId,
+          title: `Note from ${username}`,
+          content: noteText,
+        });
+        await sendMessage({
+          text: `📝 I've created a new note with your message!`,
           sender: "System",
           pageId,
         });
@@ -322,6 +359,10 @@ export const MainApp: React.FC<MainAppProps> = ({ pageId }) => {
   };
 
   const handleCreateNote = async () => {
+    if (!hasShownWarning) {
+      setShowWarning(true);
+      return;
+    }
     if (!pageId || !noteTitle.trim()) return;
 
     await createNote({
@@ -342,6 +383,8 @@ export const MainApp: React.FC<MainAppProps> = ({ pageId }) => {
       content: noteContent.trim(),
     });
     setEditingNoteId(null);
+    setNoteTitle("");
+    setNoteContent("");
   };
 
   const copyNoteContent = (content: string, noteId: Id<"pageNotes">) => {
@@ -351,11 +394,13 @@ export const MainApp: React.FC<MainAppProps> = ({ pageId }) => {
   };
 
   // Message list rendering
-  const messageList = messages.map((message, index) => {
+  const messageList = [...messages].reverse().map((message, index, array) => {
     const messageText = streamedMessageId === message._id ? streamedMessage : message.text;
     const likes = message.likes ?? 0;
     const isAiResponse =
-      message.sender === "AI" && index > 0 && messages[index - 1].text.startsWith("@ai");
+      message.sender === "AI" &&
+      index < array.length - 1 &&
+      array[index + 1].text.startsWith("@ai");
 
     return (
       <MessageItem
@@ -417,19 +462,28 @@ export const MainApp: React.FC<MainAppProps> = ({ pageId }) => {
   // Render
   return (
     <div className={`min-h-screen ${cardClasses} relative flex flex-col font-['Inter']`}>
+      <style>
+        {`
+          @keyframes highlight {
+            0% { background-color: rgba(59, 130, 246, 0.2); }
+            100% { background-color: transparent; }
+          }
+          .highlight {
+            animation: highlight 2s ease-out;
+          }
+        `}
+      </style>
       {/* Grid background with gradient */}
       <div className="relative h-full w-full">
         {isDark ? (
           <div className="absolute top-0 z-[-2] h-screen w-screen bg-neutral-950 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))]"></div>
         ) : (
-          <div className="absolute inset-0 -z-10 h-full w-full bg-white bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:14px_24px]">
-            <div className="absolute left-0 right-0 top-0 -z-10 m-auto h-[310px] w-[310px] rounded-full bg-fuchsia-400 opacity-20 blur-[100px]"></div>
-          </div>
+          <div className="absolute inset-0 -z-10 h-full w-full bg-[#FAFAFA]"></div>
         )}
       </div>
 
       {/* Header */}
-      <header className="relative w-full py-6 px-4">
+      <header className="fixed top-0 left-0 right-0 w-full py-6 px-4 z-50 bg-white dark:bg-black">
         <div className="max-w-7xl mx-auto flex justify-between items-center font-['Inter']">
           {/* Mobile Menu Button */}
           <button onClick={() => setShowMobileMenu(!showMobileMenu)} className="md:hidden">
@@ -438,7 +492,7 @@ export const MainApp: React.FC<MainAppProps> = ({ pageId }) => {
 
           {/* Logo and Title */}
           <h1
-            className={`${iconClasses} text-xl font-normal flex flex-col md:flex-row items-center gap-2 flex-1 justify-center md:justify-start`}>
+            className={`${isDark ? "text-white" : iconClasses} text-xl font-normal flex flex-col md:flex-row items-center gap-2 flex-1 justify-center md:justify-start`}>
             <a href="/" target="_blank" rel="noopener noreferrer" className="md:flex">
               <img
                 src={isDark ? "/convex-logo-white.svg" : "/convex-logo-black.svg"}
@@ -446,17 +500,69 @@ export const MainApp: React.FC<MainAppProps> = ({ pageId }) => {
                 className="h-4"
               />
             </a>
-            <a
-              href="https://convex.link/chatsynclinks"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm md:text-lg">
-              AI Chat & ToDo List Sync App
-            </a>
+            Sync Engine Demo
+            {/* AI Chat & ToDo List Sync App */}
           </h1>
 
-          {/* Desktop Navigation */}
+          {/* Desktop Navigation with Search */}
           <div className="hidden md:flex items-center gap-6">
+            {/* Search Box */}
+            <div className="relative flex items-center">
+              <div
+                className={`flex items-center gap-2 ${isDark ? "bg-zinc-800" : "bg-zinc-100"} rounded-lg px-3 py-1.5 border border-zinc-300`}>
+                <Search className="w-4 h-4 text-zinc-400" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    if (e.target.value && pageId) {
+                      searchMessages({ query: e.target.value, pageId })
+                        .then((results) => setSelectedMessageIds(results))
+                        .catch(() => setSelectedMessageIds([]));
+                    } else setSelectedMessageIds([]);
+                  }}
+                  placeholder="Search messages..."
+                  className={`bg-transparent w-40 outline-none ${textClasses} placeholder-zinc-500 text-sm`}
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => {
+                      setSearchQuery("");
+                      setSelectedMessageIds([]);
+                    }}
+                    className={`${isDark ? "text-zinc-400" : "text-zinc-600"} hover:text-red-500 transition-colors`}>
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+              {/* Search Results Dropdown */}
+              {searchQuery && selectedMessageIds.length > 0 && (
+                <div
+                  className={`absolute top-full left-0 right-0 mt-1 ${cardClasses} border border-zinc-300 rounded-lg shadow-lg overflow-hidden max-h-[300px] overflow-y-auto z-50`}>
+                  {messages
+                    .filter((m) => selectedMessageIds.includes(m._id))
+                    .map((message) => (
+                      <button
+                        key={message._id}
+                        onClick={() => {
+                          const messageElement = document.getElementById(`message-${message._id}`);
+                          if (messageElement) {
+                            messageElement.scrollIntoView({ behavior: "smooth" });
+                            messageElement.classList.add("highlight");
+                            setTimeout(() => messageElement.classList.remove("highlight"), 2000);
+                          }
+                        }}
+                        className={`w-full text-left p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 ${textClasses} text-sm border-b border-zinc-200 dark:border-zinc-700 last:border-0`}>
+                        <div className="font-medium mb-0.5">{message.sender}</div>
+                        <div className="line-clamp-2">{message.text}</div>
+                      </button>
+                    ))}
+                </div>
+              )}
+            </div>
+
+            {/* Existing Navigation Items */}
             <a
               href="https://convex.link/chatsynclinks"
               target="_blank"
@@ -493,6 +599,13 @@ export const MainApp: React.FC<MainAppProps> = ({ pageId }) => {
 
           {/* Mobile Icons */}
           <div className="flex md:hidden items-center gap-4">
+            {/* Add Mobile Search Button */}
+            <button
+              onClick={() => setShowMobileMenu(!showMobileMenu)}
+              className={`${iconClasses} hover:opacity-80 transition-opacity`}>
+              <Search className="w-5 h-5" />
+            </button>
+
             <button
               onClick={() => setIsDark(!isDark)}
               className={`${iconClasses} hover:opacity-80 transition-opacity`}>
@@ -504,8 +617,39 @@ export const MainApp: React.FC<MainAppProps> = ({ pageId }) => {
 
         {/* Mobile Navigation Menu */}
         {showMobileMenu && (
-          <div className="md:hidden absolute top-full left-0 right-0 bg-white dark:bg-zinc-900 border-t border-zinc-200 dark:border-zinc-800 py-4 px-4 z-50">
+          <div className="md:hidden absolute top-full left-0 right-0 bg-white dark:bg-black border-t border-zinc-200 dark:border-zinc-800 py-4 px-4 z-50">
             <div className="flex flex-col gap-4">
+              {/* Search Box in Mobile Menu */}
+              <div
+                className={`flex items-center gap-2 ${isDark ? "bg-zinc-800" : "bg-zinc-100"} rounded-lg p-3`}>
+                <Search className="w-4 h-4 text-zinc-400" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    if (e.target.value && pageId) {
+                      searchMessages({ query: e.target.value, pageId })
+                        .then((results) => setSelectedMessageIds(results))
+                        .catch(() => setSelectedMessageIds([]));
+                    } else setSelectedMessageIds([]);
+                  }}
+                  placeholder="Search messages..."
+                  className={`bg-transparent w-full outline-none ${textClasses} placeholder-zinc-500 text-sm`}
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => {
+                      setSearchQuery("");
+                      setSelectedMessageIds([]);
+                    }}
+                    className={`${isDark ? "text-zinc-400" : "text-zinc-600"} hover:text-red-500 transition-colors`}>
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+
+              {/* Existing Mobile Menu Items */}
               <a
                 href="https://convex.link/chatsynclinks"
                 target="_blank"
@@ -540,247 +684,148 @@ export const MainApp: React.FC<MainAppProps> = ({ pageId }) => {
         )}
       </header>
 
-      {/* Content */}
-      <main className={`relative flex-1 flex flex-col items-center px-4 ${bgClasses}`}>
+      {/* Main Content */}
+      <main className={`relative flex-1 flex flex-col items-center px-4 ${bgClasses} mt-24`}>
         <div className="absolute top-0 z-[-2] h-screen w-screen bg-neutral-950 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))]"></div>
 
-        {/* Features Modal */}
-        {showFeaturesModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className={`${cardClasses} max-w-2xl w-full mx-4 p-6 rounded-lg`}>
-              <div className="flex justify-between items-center mb-4">
-                <h2 className={`text-xl font-normal tracking-tighter ${iconClasses}`}>
-                  Demo Features
-                </h2>
+        <div className="w-full max-w-7xl flex flex-col gap-6 relative items-start mt-8">
+          {/* Top Section - Chat and Todo */}
+          <div className="w-full flex gap-6">
+            {/* Chat Column - 2/3 width */}
+            <div className="flex-[2]">
+              <h2
+                className={`text-xl font-normal mb-3 tracking-tighter ${iconClasses} flex items-center gap-2`}>
+                Chat
+                <span className="text-sm">(Public)</span>
                 <button
-                  onClick={() => setShowFeaturesModal(false)}
-                  className={`${iconClasses} hover:text-gray-300 transition-colors`}>
-                  <X className="w-6 h-6" />
+                  onClick={() => {
+                    setIsMuted(!isMuted);
+                    if (!isMuted) audioRef.current?.pause();
+                  }}
+                  className={`${iconClasses} hover:opacity-80 transition-opacity ml-2`}
+                  aria-label={isMuted ? "Unmute chat sounds" : "Mute chat sounds"}>
+                  {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
                 </button>
-              </div>
-              <div className={`${textClasses}`}>
-                <p className="text-sm font-medium mb-2">Real-time Chat:</p>
-                <ul className="list-disc pl-5 mb-4">
-                  <li className="text-sm">Send and receive chat messages instantly</li>
-                  <li className="text-sm">AI-powered chat responses using "@ai" command</li>
-                  <li className="text-sm">Real-time message streaming from OpenAI</li>
-                  <li className="text-sm">Create reminders by typing "remind me" in chat</li>
-                  <li className="text-sm">Search functionality for messages using vector search</li>
-                  <li className="text-sm">Like messages and see like counts</li>
-                  <li className="text-sm">Send emoji reactions</li>
-                </ul>
-                <p className="text-sm font-medium mb-2">Reminders/Todos:</p>
-                <ul className="list-disc pl-5">
-                  <li className="text-sm">Create and manage public reminders</li>
-                  <li className="text-sm">Toggle completion status</li>
-                  <li className="text-sm">Upvote and downvote reminders</li>
-                  <li className="text-sm">Real-time updates across all connected clients</li>
-                  <li className="text-sm">Delete reminders with hover controls</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        )}
-
-        <div className="w-full max-w-7xl flex flex-col md:flex-row gap-6 relative items-start mt-8">
-          {/* Chat Column */}
-          <div className="flex-[2]">
-            <h2
-              className={`text-xl font-normal mb-3 tracking-tighter ${iconClasses} flex items-center gap-2`}>
-              Chat
-              <span className="text-sm">(Public)</span>
-              <button
-                onClick={() => {
-                  setIsMuted(!isMuted);
-                  if (!isMuted) audioRef.current?.pause();
-                }}
-                className={`${iconClasses} hover:opacity-80 transition-opacity ml-2`}
-                aria-label={isMuted ? "Unmute chat sounds" : "Mute chat sounds"}>
-                {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
-              </button>
-            </h2>
-            <div className={`${cardClasses} rounded-lg p-4 h-[500px] flex flex-col mb-6`}>
-              {/* Chat Box */}
-              <div className="flex-1 overflow-y-auto mb-4">
-                <div className="flex flex-col h-full">
-                  <div className="space-y-2 mt-auto">
-                    {messageList}
-                    <div ref={messagesEndRef} />
-                  </div>
+              </h2>
+              <div
+                className={`${cardClasses} rounded-lg p-4 h-[500px] flex flex-col border border-zinc-300 shadow`}>
+                {/* Chat Box */}
+                <div className="flex-1 overflow-y-auto mb-4">
+                  <div className="space-y-4 flex flex-col">{messageList}</div>
                 </div>
-              </div>
-              <form onSubmit={handleSubmitMessage}>
-                <div
-                  className={`${isDark ? "bg-zinc-800" : "bg-zinc-100"} rounded-lg p-4 flex items-center gap-4`}>
-                  {isEditingUsername ? (
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="text"
-                        value={tempUsername}
-                        onChange={(e) => setTempUsername(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            e.preventDefault();
+                <form onSubmit={handleSubmitMessage}>
+                  <div
+                    className={`${inputBgClasses} rounded-lg p-4 flex items-center gap-4 shadow-sm`}>
+                    {isEditingUsername ? (
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="text"
+                          value={tempUsername}
+                          onChange={(e) => setTempUsername(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault();
+                              if (tempUsername.trim()) {
+                                setUsername(tempUsername.trim());
+                                setIsEditingUsername(false);
+                              }
+                            }
+                          }}
+                          placeholder="Enter username..."
+                          className="bg-white text-black outline-none placeholder-zinc-500 text-sm rounded px-2 py-1 border border-zinc-200"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
                             if (tempUsername.trim()) {
                               setUsername(tempUsername.trim());
-                              setIsEditingUsername(false);
                             }
-                          }
-                        }}
-                        placeholder="Enter username..."
-                        className="bg-white text-black outline-none placeholder-zinc-500 text-sm rounded px-2 py-1"
-                      />
+                            setIsEditingUsername(false);
+                          }}
+                          className="text-sm bg-black text-white px-2 py-1 rounded hover:bg-zinc-800">
+                          Save
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setIsEditingUsername(false)}
+                          className="text-sm bg-white text-black px-2 py-1 rounded border border-zinc-200 hover:bg-zinc-50">
+                          Cancel
+                        </button>
+                      </div>
+                    ) : (
                       <button
                         type="button"
                         onClick={() => {
-                          if (tempUsername.trim()) {
-                            setUsername(tempUsername.trim());
-                          }
-                          setIsEditingUsername(false);
+                          setTempUsername(username);
+                          setIsEditingUsername(true);
                         }}
-                        className="text-sm bg-black text-white px-2 py-1 rounded hover:bg-zinc-800">
-                        Save
+                        title="Click to set name"
+                        className={`text-sm ${isDark ? "text-zinc-400" : "text-zinc-600"} hover:text-blue-500 transition-colors`}>
+                        {username}
                       </button>
-                      <button
-                        type="button"
-                        onClick={() => setIsEditingUsername(false)}
-                        className="text-sm bg-white text-black px-2 py-1 rounded border border-zinc-200 hover:bg-zinc-50">
-                        Cancel
-                      </button>
-                    </div>
-                  ) : (
+                    )}
+                    <input
+                      type="text"
+                      value={newMessage}
+                      onChange={(e) => setNewMessage(e.target.value)}
+                      onFocus={() => {
+                        if (!hasShownWarning) {
+                          setShowWarning(true);
+                        }
+                      }}
+                      placeholder="Chat or @ai or remind me or note:..."
+                      className={`bg-transparent flex-1 outline-none ${textClasses} placeholder-zinc-500`}
+                    />
                     <button
                       type="button"
-                      onClick={() => {
-                        setTempUsername(username);
-                        setIsEditingUsername(true);
-                      }}
-                      title="Click to set name"
-                      className={`text-sm ${isDark ? "text-zinc-400" : "text-zinc-600"} hover:text-blue-500 transition-colors`}>
-                      {username}
+                      onClick={sendEmoji}
+                      className={`${isDark ? "text-zinc-400" : "text-zinc-500"} hover:text-yellow-500 transition-colors`}>
+                      <Smile className="w-4 h-4" />
                     </button>
-                  )}
-                  <input
-                    type="text"
-                    value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
-                    placeholder="Type a message or @ai or remind me ..."
-                    className={`bg-transparent flex-1 outline-none ${textClasses} placeholder-zinc-500`}
-                  />
-                  <button
-                    type="button"
-                    onClick={sendEmoji}
-                    className={`${isDark ? "text-zinc-400" : "text-zinc-600"} hover:text-yellow-500 transition-colors`}>
-                    <Smile className="w-4 h-4" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setNewMessage("@ai")}
-                    className={`${isDark ? "text-zinc-400" : "text-zinc-600"} hover:text-blue-500 transition-colors`}>
-                    Ask AI
-                  </button>
-                  <button
-                    type="submit"
-                    className={`${isDark ? "text-zinc-400" : "text-zinc-600"} hover:text-blue-500 transition-colors`}>
-                    <Send className="w-4 h-4" />
-                  </button>
-                </div>
-              </form>
+                    <button
+                      type="button"
+                      onClick={() => setNewMessage("@ai")}
+                      className={`${isDark ? "text-zinc-400" : "text-zinc-500"} hover:text-blue-500 transition-colors`}>
+                      Ask AI
+                    </button>
+                    <button
+                      type="submit"
+                      className={`${isDark ? "text-zinc-400" : "text-zinc-500"} hover:text-blue-500 transition-colors`}>
+                      <Send className="w-4 h-4" />
+                    </button>
+                  </div>
+                </form>
+              </div>
             </div>
 
-            {/* Search Messages Box */}
-            <h2 className={`text-xl font-normal mb-3 tracking-tighter ${iconClasses}`}>
-              Search Messages
-            </h2>
-            <div className={`${cardClasses} rounded-lg p-4 mb-10`}>
-              <div
-                className={`${isDark ? "bg-zinc-800" : "bg-zinc-100"} rounded-lg p-4 flex items-center gap-4`}>
-                <Search className="w-4 h-4 text-zinc-400" />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => {
-                    setSearchQuery(e.target.value);
-                    if (e.target.value && pageId) {
-                      searchMessages({ query: e.target.value, pageId })
-                        .then((results) => {
-                          console.log("Search results received:", results);
-                          setSelectedMessageIds(results);
-                        })
-                        .catch((error) => {
-                          console.error("Search error:", error);
-                          setSelectedMessageIds([]);
-                        });
-                    } else {
-                      setSelectedMessageIds([]);
-                    }
-                  }}
-                  placeholder="Search messages..."
-                  className={`bg-transparent flex-1 outline-none ${textClasses} placeholder-zinc-500`}
-                />
-                {searchQuery && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSearchQuery("");
-                      setSelectedMessageIds([]);
-                    }}
-                    className={`${isDark ? "text-zinc-400" : "text-zinc-600"} hover:text-red-500 transition-colors`}>
-                    <X className="w-4 h-4" />
-                  </button>
-                )}
-              </div>
+            {/* Todo Column - 1/3 width */}
+            <div className="flex-1">
+              <h2
+                className={`text-xl font-normal mb-3 tracking-tighter ${iconClasses} flex items-center gap-2`}>
+                ToDo List
+                <span className="text-sm">(Public)</span>
+              </h2>
+              <div className={`${cardClasses} rounded-lg p-4 shadow border border-zinc-300`}>
+                <form onSubmit={handleSubmitTodo} className="mb-6">
+                  <div className={`flex items-center gap-3 ${inputBgClasses} rounded-lg p-3`}>
+                    <PlusCircle className="w-4 h-4" />
+                    <input
+                      type="text"
+                      value={newTodo}
+                      onChange={(e) => setNewTodo(e.target.value)}
+                      placeholder="Add a task..."
+                      className={`bg-transparent flex-1 outline-none ${isDark ? "text-zinc-100" : "text-zinc-900"} placeholder-zinc-500 focus:ring-0`}
+                    />
+                  </div>
+                </form>
 
-              {searchQuery && (
-                <div className="mt-4 space-y-2">
-                  <div className={`${textClasses} text-sm font-medium`}>
-                    Search Results {selectedMessageIds.length === 0 && "(No matches found)"}
-                  </div>
-                  <div className="overflow-y-auto space-y-2">
-                    {messages
-                      .filter((m) => selectedMessageIds.includes(m._id))
-                      .map((message) => (
-                        <MessageItem
-                          key={message._id}
-                          message={message}
-                          isDark={isDark}
-                          textClasses={textClasses}
-                          isSelected={false}
-                        />
-                      ))}
-                  </div>
-                </div>
-              )}
+                <div className="space-y-3">{todoList}</div>
+              </div>
             </div>
           </div>
 
-          {/* Todo Column */}
-          <div className="flex-1">
-            <h2
-              className={`text-xl font-normal mb-3 tracking-tighter ${iconClasses} flex items-center gap-2`}>
-              ToDo List
-              <span className="text-sm">(Public)</span>
-            </h2>
-            <div
-              className={`${cardClasses} rounded-lg p-4 hover:border-zinc-300 transition-colors mb-6`}>
-              <form onSubmit={handleSubmitTodo} className="mb-6">
-                <div
-                  className={`flex items-center gap-3 ${isDark ? "bg-zinc-800" : "bg-white"} rounded-lg p-3`}>
-                  <PlusCircle className="w-4 h-4" />
-                  <input
-                    type="text"
-                    value={newTodo}
-                    onChange={(e) => setNewTodo(e.target.value)}
-                    placeholder="Add a task..."
-                    className={`bg-transparent flex-1 outline-none ${isDark ? "text-zinc-100" : "text-zinc-900"} placeholder-zinc-500 focus:ring-0`}
-                  />
-                </div>
-              </form>
-
-              <div className="space-y-3">{todoList}</div>
-            </div>
-
-            {/* Notes Section */}
+          {/* Notes Section - Full Width */}
+          <div className="w-full">
             <h2 className={`text-xl font-normal mb-3 tracking-tighter ${iconClasses}`}>Notes</h2>
             <div className={`${cardClasses} rounded-lg p-4`}>
               {!isCreatingNote && (
@@ -798,12 +843,22 @@ export const MainApp: React.FC<MainAppProps> = ({ pageId }) => {
                     type="text"
                     value={noteTitle}
                     onChange={(e) => setNoteTitle(e.target.value)}
+                    onFocus={() => {
+                      if (!hasShownWarning) {
+                        setShowWarning(true);
+                      }
+                    }}
                     placeholder="Note title..."
                     className={`w-full mb-2 bg-transparent outline-none ${isDark ? "text-zinc-100" : "text-zinc-900"} placeholder-zinc-500 text-lg font-medium`}
                   />
                   <textarea
                     value={noteContent}
                     onChange={(e) => setNoteContent(e.target.value)}
+                    onFocus={() => {
+                      if (!hasShownWarning) {
+                        setShowWarning(true);
+                      }
+                    }}
                     placeholder="Start typing..."
                     rows={4}
                     className={`w-full bg-transparent outline-none ${isDark ? "text-zinc-100" : "text-zinc-900"} placeholder-zinc-500 resize-none`}
@@ -834,83 +889,58 @@ export const MainApp: React.FC<MainAppProps> = ({ pageId }) => {
                 {notes.map((note) => (
                   <div
                     key={note._id}
-                    className={`${isDark ? "bg-zinc-800/50" : "bg-zinc-100"} rounded-lg p-4 group`}>
-                    {editingNoteId === note._id ? (
-                      <div className={`${isDark ? "bg-zinc-800" : "bg-white"} rounded-lg p-4`}>
-                        <input
-                          type="text"
-                          value={noteTitle}
-                          onChange={(e) => setNoteTitle(e.target.value)}
-                          placeholder="Note title..."
-                          className={`w-full mb-2 bg-transparent outline-none ${isDark ? "text-zinc-100" : "text-zinc-900"} placeholder-zinc-500 text-lg font-medium`}
-                        />
-                        <textarea
-                          value={noteContent}
-                          onChange={(e) => setNoteContent(e.target.value)}
-                          placeholder="Start typing..."
-                          rows={4}
-                          className={`w-full bg-transparent outline-none ${isDark ? "text-zinc-100" : "text-zinc-900"} placeholder-zinc-500 resize-none`}
-                        />
-                        <div className="flex justify-end gap-2 mt-2">
-                          <button
-                            onClick={() => {
-                              setEditingNoteId(null);
-                              setNoteTitle("");
-                              setNoteContent("");
-                            }}
-                            className="px-3 py-1 text-sm bg-white text-black rounded border border-zinc-200 hover:bg-zinc-50">
-                            Cancel
-                          </button>
-                          <button
-                            onClick={() => handleUpdateNote(note._id)}
-                            className="px-3 py-1 text-sm bg-black text-white rounded hover:bg-zinc-800">
-                            Save
-                          </button>
-                        </div>
+                    className={`rounded-lg p-4 group border ${isDark ? "border-zinc-700 bg-zinc-800" : "border-zinc-400 bg-white"}`}>
+                    <div className="flex justify-between items-start mb-2">
+                      <h3 className={`font-medium ${isDark ? "text-zinc-100" : "text-zinc-900"}`}>
+                        {note.title}
+                      </h3>
+                      <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button
+                          onClick={() =>
+                            setExpandedNotes((prev) => ({ ...prev, [note._id]: !prev[note._id] }))
+                          }
+                          className={`${iconClasses} hover:text-blue-500 transition-colors`}>
+                          {expandedNotes[note._id] ? (
+                            <ChevronUp className="w-4 h-4" />
+                          ) : (
+                            <ChevronDown className="w-4 h-4" />
+                          )}
+                        </button>
+                        <button
+                          onClick={() => copyNoteContent(note.content, note._id)}
+                          className={`${iconClasses} hover:text-blue-500 transition-colors`}>
+                          {copiedNoteId === note._id ? "Copied!" : <Copy className="w-4 h-4" />}
+                        </button>
+                        <button
+                          onClick={() => {
+                            setEditingNoteId(note._id);
+                            setNoteTitle(note.title);
+                            setNoteContent(note.content);
+                          }}
+                          className={`${iconClasses} hover:text-blue-500 transition-colors`}>
+                          <Edit2 className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => {
+                            if (window.confirm("Delete this note?")) {
+                              deleteNote({ id: note._id });
+                            }
+                          }}
+                          className={`${iconClasses} hover:text-red-500 transition-colors`}>
+                          <Trash2 className="w-4 h-4" />
+                        </button>
                       </div>
-                    ) : (
-                      <>
-                        <div className="flex justify-between items-start mb-2">
-                          <h3
-                            className={`font-medium ${isDark ? "text-zinc-100" : "text-zinc-900"}`}>
-                            {note.title}
-                          </h3>
-                          <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button
-                              onClick={() => copyNoteContent(note.content, note._id)}
-                              className={`${iconClasses} hover:text-blue-500 transition-colors`}>
-                              {copiedNoteId === note._id ? "Copied!" : <Copy className="w-4 h-4" />}
-                            </button>
-                            <button
-                              onClick={() => {
-                                setEditingNoteId(note._id);
-                                setNoteTitle(note.title);
-                                setNoteContent(note.content);
-                              }}
-                              className={`${iconClasses} hover:text-blue-500 transition-colors`}>
-                              <Edit2 className="w-4 h-4" />
-                            </button>
-                            <button
-                              onClick={() => {
-                                if (window.confirm("Delete this note?")) {
-                                  deleteNote({ id: note._id });
-                                }
-                              }}
-                              className={`${iconClasses} hover:text-red-500 transition-colors`}>
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </div>
-                        <p className={`${textClasses} whitespace-pre-wrap`}>
-                          {note.content.length > 250
-                            ? `${note.content.slice(0, 250)}...`
-                            : note.content}
-                        </p>
-                        <div className={`text-xs ${mutedTextClasses} mt-2`}>
-                          Last updated: {new Date(note.updatedAt).toLocaleString()}
-                        </div>
-                      </>
-                    )}
+                    </div>
+                    <p className={`${textClasses} whitespace-pre-wrap`}>
+                      {expandedNotes[note._id]
+                        ? note.content
+                        : note.content.length > 250
+                          ? `${note.content.slice(0, 250)}...`
+                          : note.content}
+                    </p>
+                    <div className={`text-xs ${mutedTextClasses} mt-2`}>
+                      Last updated: {new Date(note.updatedAt).toLocaleString()}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -935,7 +965,7 @@ export const MainApp: React.FC<MainAppProps> = ({ pageId }) => {
       {/* Floating Box */}
       {showFloatingBox && (
         <a href="https://convex.link/chatsynclinks" target="_blank" rel="noopener noreferrer">
-          <div className="fixed bottom-4 right-4 bg-black text-white p-2 rounded-lg shadow-lg flex items-center gap-3 z-50">
+          <div className="fixed bottom-4 right-4 bg-black text-white p-2 rounded-lg shadow flex items-center gap-3 z-50">
             <span>Powered by</span>
             <img src="/convex-logo-white.svg" alt="Convex Logo" className="h-4" />
             <button
@@ -987,6 +1017,87 @@ export const MainApp: React.FC<MainAppProps> = ({ pageId }) => {
       <audio ref={audioRef} preload="auto">
         <source src="/message.mp3" type="audio/mpeg" />
       </audio>
+
+      {/* Features Modal */}
+      {showFeaturesModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div
+            className={`${cardClasses} rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 relative`}>
+            <button
+              onClick={() => setShowFeaturesModal(false)}
+              className="absolute top-4 right-4 text-zinc-400 hover:text-zinc-100 transition-colors">
+              <X className="w-6 h-6" />
+            </button>
+
+            <h2 className={`text-2xl font-normal tracking-tighter ${textClasses} mb-6`}>
+              Features
+            </h2>
+
+            <div className="space-y-8">
+              <div>
+                <h3 className={`text-lg font-medium ${textClasses} mb-3`}>Real-time Chat</h3>
+                <ul className={`list-disc pl-5 space-y-2 ${textClasses}`}>
+                  <li>Send and receive chat messages instantly</li>
+                  <li>AI-powered chat responses using "@ai" command</li>
+                  <li>Create reminders by typing "remind me" in chat</li>
+                  <li>Create notes by typing "note:" in chat</li>
+                  <li>Search functionality for messages</li>
+                  <li>Like messages and see like counts</li>
+                  <li>Send emoji reactions</li>
+                  <li>Message sound notifications with mute control</li>
+                </ul>
+              </div>
+
+              <div>
+                <h3 className={`text-lg font-medium ${textClasses} mb-3`}>Notes</h3>
+                <ul className={`list-disc pl-5 space-y-2 ${textClasses}`}>
+                  <li>Create and manage notes for each page</li>
+                  <li>Rich text editing support</li>
+                  <li>Title and content organization</li>
+                  <li>Preview with content truncation</li>
+                  <li>Copy note content with one click</li>
+                  <li>Real-time updates across all clients</li>
+                </ul>
+              </div>
+
+              <div>
+                <h3 className={`text-lg font-medium ${textClasses} mb-3`}>Reminders/Todos</h3>
+                <ul className={`list-disc pl-5 space-y-2 ${textClasses}`}>
+                  <li>Create and manage public reminders</li>
+                  <li>Toggle completion status</li>
+                  <li>Upvote and downvote reminders</li>
+                  <li>Real-time updates across all connected clients</li>
+                  <li>Delete reminders with hover controls</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Warning Modal */}
+      {showWarning && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className={`${cardClasses} rounded-lg max-w-md w-full p-6 relative`}>
+            <h2 className={`text-xl font-medium ${textClasses} mb-4`}>⚠️ Public Demo Warning</h2>
+            <p className={`${textClasses} mb-6`}>
+              Any text you enter in this demo is publicly visible to showcase multiplayer features.
+              Please be kind!
+            </p>
+            <div className="flex justify-end">
+              <button
+                onClick={() => {
+                  setShowWarning(false);
+                  setHasShownWarning(true);
+                  localStorage.setItem("hasShownWarning", "true");
+                }}
+                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                I Understand
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

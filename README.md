@@ -8,11 +8,13 @@ An open source chat and reminder application built with [Convex](https://convex.
 
 - **Real-time Chat:**
 
+  - Public content warning for first-time users
   - Send and receive chat messages instantly
   - Set and customize your username at any time
   - AI-powered chat responses using "@ai" command
   - Real-time message streaming from OpenAI
   - Create reminders by typing "remind me" in chat
+  - Create notes by typing "note:" in chat
   - Search functionality for messages using vector search
   - Like messages and see like counts
   - Send emoji reactions
@@ -21,10 +23,31 @@ An open source chat and reminder application built with [Convex](https://convex.
   - Dark/Light mode support
   - Threaded AI responses
 
+- **User Experience:**
+
+  - First-time user warning about public content
+  - Customizable username setting
+  - Dark/Light mode toggle
+  - Mobile-responsive design
+  - Sound notifications with mute option
+  - Real-time message streaming
+  - Instant search results
+  - Beautiful UI with smooth transitions
+  - Hover tooltips for better UX
+  - Expandable content sections
+  - Tab-based navigation for different content types
+  - Local storage for user preferences
+
 - **Notes:**
 
   - Create and manage notes for each page
-  - Rich text editing support
+  - Rich text editing with Editor.js support
+    - Paragraph blocks
+    - Header blocks
+    - List blocks
+    - Quote blocks
+    - Inline formatting toolbar
+    - Custom block settings
   - Title and content organization
   - Preview with content truncation
   - Copy note content with one click
@@ -42,7 +65,6 @@ An open source chat and reminder application built with [Convex](https://convex.
   - Create todos directly from chat using "remind me"
 
 - **Admin Dashboard:**
-
   - Moderation dashboard at `/mod`
   - Sign in using Clerk to manage your profile
   - View and delete individual or all chat messages
@@ -54,18 +76,6 @@ An open source chat and reminder application built with [Convex](https://convex.
   - Toggle view for messages, todos, and notes per page
   - Bulk actions for clearing messages, todos, and notes
   - Individual content management for each page
-
-- **User Experience:**
-  - Customizable username setting
-  - Dark/Light mode toggle
-  - Mobile-responsive design
-  - Sound notifications with mute option
-  - Real-time message streaming
-  - Instant search results
-  - Beautiful UI with smooth transitions
-  - Hover tooltips for better UX
-  - Expandable content sections
-  - Tab-based navigation for different content types
 
 ## Stack
 

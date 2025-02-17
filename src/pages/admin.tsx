@@ -55,7 +55,7 @@ const AdminPage = () => {
 
       {/* Login Content */}
       <div className="flex-1 flex items-center justify-center bg-gray-50">
-        <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+        <div className="bg-white p-8 rounded-lg shadow w-full max-w-md">
           <h2 className="text-2xl font-bold mb-6 text-center">Admin Login</h2>
           <SignIn redirectUrl="/mod" />
         </div>
