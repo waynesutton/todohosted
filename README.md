@@ -20,14 +20,16 @@ An open source chat and reminder application built with [Convex](https://convex.
   - Send emoji reactions
   - Message sound notifications with mute control
   - Instant muting of chat sounds
-  - Dark/Light mode support
   - Threaded AI responses
+  - Message highlighting for search results
+  - Code block syntax highlighting with copy functionality
+  - Markdown support for rich text formatting
+  - Real-time message streaming with typing indicators
 
 - **User Experience:**
 
   - First-time user warning about public content
   - Customizable username setting
-  - Dark/Light mode toggle
   - Mobile-responsive design
   - Sound notifications with mute option
   - Real-time message streaming
@@ -37,23 +39,22 @@ An open source chat and reminder application built with [Convex](https://convex.
   - Expandable content sections
   - Tab-based navigation for different content types
   - Local storage for user preferences
+  - Responsive mobile menu with hamburger navigation
+  - Accessible UI elements with ARIA labels
+  - Smooth scrolling to highlighted messages
 
 - **Notes:**
 
   - Create and manage notes for each page
-  - Rich text editing with Editor.js support
-    - Paragraph blocks
-    - Header blocks
-    - List blocks
-    - Quote blocks
-    - Inline formatting toolbar
-    - Custom block settings
+  - Rich text editing support
   - Title and content organization
   - Preview with content truncation
   - Copy note content with one click
   - Real-time updates across all clients
   - Edit and delete functionality
   - Timestamp tracking for updates
+  - Expandable note content
+  - Group hover controls for note actions
 
 - **Reminders/Todos:**
 
@@ -63,6 +64,19 @@ An open source chat and reminder application built with [Convex](https://convex.
   - Real-time updates across all connected clients
   - Delete reminders with hover controls
   - Create todos directly from chat using "remind me"
+  - Vote count display
+  - Group hover animations for controls
+  - Visual completion indicators
+
+- **Search Functionality:**
+
+  - Real-time search as you type
+  - Message highlighting for search results
+  - Search results dropdown
+  - Click-to-scroll to message
+  - Search in both desktop and mobile views
+  - Clear search functionality
+  - Visual feedback for search matches
 
 - **Admin Dashboard:**
   - Moderation dashboard at `/mod`

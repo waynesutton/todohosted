@@ -253,6 +253,7 @@ export const MainApp: React.FC<MainAppProps> = ({ pageId }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
   const initialLoadRef = useRef(true);
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
 
   // Effect hooks
   useEffect(() => {
@@ -286,13 +287,18 @@ export const MainApp: React.FC<MainAppProps> = ({ pageId }) => {
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (showMobileMenu) {
+      if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target as Node)) {
         setShowMobileMenu(false);
       }
     };
 
-    document.addEventListener("click", handleClickOutside);
-    return () => document.removeEventListener("click", handleClickOutside);
+    if (showMobileMenu) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
   }, [showMobileMenu]);
 
   // Memoized values
@@ -494,14 +500,15 @@ export const MainApp: React.FC<MainAppProps> = ({ pageId }) => {
       </div>
 
       {/* Header */}
-      <header className="w-full py-6 px-4 bg-white dark:bg-black">
+      <header className="w-full py-6 px-4 bg-white dark:bg-black relative">
         <div className="max-w-7xl mx-auto flex justify-between items-center font-['Inter']">
           {/* Mobile Menu Button */}
           <button
             onClick={(e) => {
-              e.stopPropagation();
+              e.preventDefault();
               setShowMobileMenu(!showMobileMenu);
             }}
+            aria-label="Toggle mobile menu"
             className="md:hidden">
             <Menu className={`w-6 h-6 ${iconClasses}`} />
           </button>
@@ -517,7 +524,6 @@ export const MainApp: React.FC<MainAppProps> = ({ pageId }) => {
               />
             </a>
             Sync Engine Demo
-            {/* AI Chat & ToDo List Sync App */}
           </h1>
 
           {/* Desktop Navigation with Search */}
@@ -616,14 +622,18 @@ export const MainApp: React.FC<MainAppProps> = ({ pageId }) => {
 
         {/* Mobile Navigation Menu */}
         {showMobileMenu && (
-          <div className="md:hidden absolute top-full left-0 right-0 bg-white dark:bg-black border-t border-zinc-200 dark:border-zinc-800 py-4 px-4 z-50">
-            <div className="flex flex-col gap-4">
+          <div
+            ref={mobileMenuRef}
+            className="md:hidden absolute left-0 right-0 bg-white dark:bg-black border-t border-zinc-200 dark:border-zinc-800 py-4 px-4 z-50 shadow-lg">
+            <div className="max-w-7xl mx-auto flex flex-col gap-4">
               {/* Search Box in Mobile Menu */}
               <div
                 className={`flex items-center gap-2 ${isDark ? "bg-zinc-800" : "bg-zinc-100"} rounded-lg p-3`}>
                 <Search className="w-4 h-4 text-zinc-400" />
                 <input
                   type="text"
+                  id="search-input"
+                  name="search"
                   value={searchQuery}
                   onChange={(e) => {
                     setSearchQuery(e.target.value);
@@ -649,11 +659,38 @@ export const MainApp: React.FC<MainAppProps> = ({ pageId }) => {
                 )}
               </div>
 
-              {/* Existing Mobile Menu Items */}
+              {/* Search Results Dropdown */}
+              {searchQuery && selectedMessageIds.length > 0 && (
+                <div
+                  className={`${cardClasses} border border-zinc-300 rounded-lg shadow-lg overflow-hidden max-h-[300px] overflow-y-auto`}>
+                  {messages
+                    .filter((m) => selectedMessageIds.includes(m._id))
+                    .map((message) => (
+                      <button
+                        key={message._id}
+                        onClick={() => {
+                          const messageElement = document.getElementById(`message-${message._id}`);
+                          if (messageElement) {
+                            messageElement.scrollIntoView({ behavior: "smooth" });
+                            messageElement.classList.add("highlight");
+                            setTimeout(() => messageElement.classList.remove("highlight"), 2000);
+                          }
+                          setShowMobileMenu(false);
+                        }}
+                        className={`w-full text-left p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 ${textClasses} text-sm border-b border-zinc-200 dark:border-zinc-700 last:border-0`}>
+                        <div className="font-medium mb-0.5">{message.sender}</div>
+                        <div className="line-clamp-2">{message.text}</div>
+                      </button>
+                    ))}
+                </div>
+              )}
+
+              {/* Navigation Links */}
               <a
                 href="https://convex.link/chatsynclinks"
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={() => setShowMobileMenu(false)}
                 className={`${iconClasses} hover:opacity-80 transition-opacity`}>
                 Convex
               </a>
@@ -661,6 +698,7 @@ export const MainApp: React.FC<MainAppProps> = ({ pageId }) => {
                 href="https://docs.convex.dev"
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={() => setShowMobileMenu(false)}
                 className={`${iconClasses} hover:opacity-80 transition-opacity`}>
                 Docs
               </a>
@@ -668,6 +706,7 @@ export const MainApp: React.FC<MainAppProps> = ({ pageId }) => {
                 href="https://stack.convex.dev/"
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={() => setShowMobileMenu(false)}
                 className={`${iconClasses} hover:opacity-80 transition-opacity`}>
                 Blog
               </a>
@@ -720,6 +759,8 @@ export const MainApp: React.FC<MainAppProps> = ({ pageId }) => {
                       <div className="flex items-center gap-2">
                         <input
                           type="text"
+                          id="username-input"
+                          name="username"
                           value={tempUsername}
                           onChange={(e) => setTempUsername(e.target.value)}
                           onKeyDown={(e) => {
@@ -766,6 +807,8 @@ export const MainApp: React.FC<MainAppProps> = ({ pageId }) => {
                     )}
                     <input
                       type="text"
+                      id="message-input"
+                      name="message"
                       value={newMessage}
                       onChange={(e) => setNewMessage(e.target.value)}
                       onFocus={() => {
@@ -811,6 +854,8 @@ export const MainApp: React.FC<MainAppProps> = ({ pageId }) => {
                     <PlusCircle className="w-4 h-4" />
                     <input
                       type="text"
+                      id="todo-input"
+                      name="todo"
                       value={newTodo}
                       onChange={(e) => setNewTodo(e.target.value)}
                       placeholder="Add a task..."
@@ -841,6 +886,8 @@ export const MainApp: React.FC<MainAppProps> = ({ pageId }) => {
                 <div className={`${isDark ? "bg-zinc-800" : "bg-white"} rounded-lg p-4 mb-4`}>
                   <input
                     type="text"
+                    id="note-title-input"
+                    name="note-title"
                     value={noteTitle}
                     onChange={(e) => setNoteTitle(e.target.value)}
                     onFocus={() => {
@@ -852,6 +899,8 @@ export const MainApp: React.FC<MainAppProps> = ({ pageId }) => {
                     className={`w-full mb-2 bg-transparent outline-none ${isDark ? "text-zinc-100" : "text-zinc-900"} placeholder-zinc-500 text-lg font-medium`}
                   />
                   <textarea
+                    id="note-content-input"
+                    name="note-content"
                     value={noteContent}
                     onChange={(e) => setNoteContent(e.target.value)}
                     onFocus={() => {
