@@ -20,15 +20,18 @@
     "@tiptap/starter-kit": "^2.11.5",
     "@types/node": "^22.13.1",
     "@types/react-syntax-highlighter": "^15.5.13",
-    "convex": "^1.19.1",
+    "convex": "^1.17.4",
     "lucide-react": "^0.344.0",
-    "openai": "^4.83.0",
+    "openai": "^4.79.0",
     "react": "^18.3.1",
     "react-animated-heart": "^0.0.8",
     "react-dom": "^18.3.1",
     "react-markdown": "^9.0.3",
     "react-router-dom": "^7.1.5",
-    "react-syntax-highlighter": "^15.6.1"
+    "react-syntax-highlighter": "^15.6.1",
+    "@assistant-ui/react": "latest",
+    "@assistant-ui/react-ai-sdk": "latest",
+    "ai": "latest"
   },
   "devDependencies": {
     "@eslint/js": "^9.9.1",

@@ -21,13 +21,17 @@ export const get = query({
     v.object({
       _id: v.id("messages"),
       _creationTime: v.number(),
+      content: v.string(),
       text: v.string(),
-      content: v.optional(v.string()),
+      userId: v.optional(v.string()),
+      username: v.string(),
       sender: v.optional(v.string()),
-      timestamp: v.optional(v.number()),
+      isAi: v.optional(v.boolean()),
+      threadId: v.optional(v.string()),
+      timestamp: v.number(),
       likes: v.optional(v.number()),
-      textVector: v.optional(v.array(v.number())),
       isComplete: v.optional(v.boolean()),
+      textVector: v.optional(v.array(v.number())),
     })
   ),
   handler: async (ctx) => await ctx.db.query("messages").order("asc").collect(),
@@ -35,21 +39,25 @@ export const get = query({
 
 export const send = mutation({
   args: {
-    text: v.string(),
-    sender: v.string(),
+    content: v.string(),
+    userId: v.string(),
+    username: v.string(),
+    threadId: v.optional(v.string()),
+    isAi: v.optional(v.boolean()),
   },
-  returns: v.id("messages"),
-  handler: async (ctx, { text, sender }) => {
-    const vector = textToVector(text);
-    console.log("New message:", text);
-    console.log("Generated vector:", vector);
-
-    return await ctx.db.insert("messages", {
-      text,
-      content: text,
-      sender,
+  handler: async (ctx, args) => {
+    const vector = textToVector(args.content);
+    await ctx.db.insert("messages", {
+      content: args.content,
+      text: args.content, // For backward compatibility
+      userId: args.userId,
+      username: args.username,
+      sender: args.username, // For backward compatibility
+      isAi: args.isAi,
+      threadId: args.threadId,
       timestamp: Date.now(),
       likes: 0,
+      isComplete: true,
       textVector: vector,
     });
   },
@@ -329,5 +337,38 @@ export const streamResponse = action({
       });
     }
     return null;
+  },
+});
+
+export const list = query({
+  args: {
+    threadId: v.optional(v.string()),
+  },
+  returns: v.array(
+    v.object({
+      _id: v.id("messages"),
+      _creationTime: v.number(),
+      content: v.string(),
+      text: v.string(),
+      userId: v.optional(v.string()),
+      username: v.string(),
+      sender: v.optional(v.string()),
+      isAi: v.optional(v.boolean()),
+      threadId: v.optional(v.string()),
+      timestamp: v.number(),
+      likes: v.optional(v.number()),
+      isComplete: v.optional(v.boolean()),
+      textVector: v.optional(v.array(v.number())),
+    })
+  ),
+  handler: async (ctx, args) => {
+    if (args.threadId)
+      return await ctx.db
+        .query("messages")
+        .withIndex("by_threadId", (q) => q.eq("threadId", args.threadId))
+        .order("desc")
+        .take(50);
+
+    return await ctx.db.query("messages").order("desc").take(50);
   },
 });

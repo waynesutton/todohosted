@@ -11,17 +11,20 @@ export default defineSchema({
   }),
 
   messages: defineTable({
-    channelId: v.optional(v.id("channels")),
-    authorId: v.optional(v.id("users")),
-    content: v.optional(v.string()),
-    sender: v.optional(v.string()),
+    content: v.string(),
     text: v.string(),
-    timestamp: v.optional(v.number()),
+    userId: v.optional(v.string()),
+    username: v.string(),
+    sender: v.optional(v.string()),
+    isAi: v.optional(v.boolean()),
+    threadId: v.optional(v.string()),
+    timestamp: v.number(),
     likes: v.optional(v.number()),
-    textVector: v.optional(v.array(v.number())),
     isComplete: v.optional(v.boolean()),
+    textVector: v.optional(v.array(v.number())),
   })
-    .index("by_channel", ["channelId"])
+    .index("by_timestamp", ["timestamp"])
+    .index("by_threadId", ["threadId"])
     .searchIndex("search_text", {
       searchField: "text",
       filterFields: ["sender"],
