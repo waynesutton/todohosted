@@ -305,7 +305,7 @@ export const MainApp: React.FC<MainAppProps> = ({ pageId }) => {
   const iconClasses = isDark ? "text-white" : "text-zinc-600";
   const cardClasses = isDark ? "bg-zinc-900" : "bg-white";
   const textClasses = isDark ? "text-zinc-400" : "text-zinc-600";
-  const bgClasses = isDark ? "bg-slate-950" : "bg-white";
+  const bgClasses = isDark ? "bg-slate-950" : "bg-[#F5F5F4]";
   const mutedTextClasses = isDark ? "text-zinc-500" : "text-zinc-500";
   const inputBgClasses = isDark ? "bg-zinc-800" : "bg-white border border-zinc-200";
 
@@ -725,7 +725,7 @@ export const MainApp: React.FC<MainAppProps> = ({ pageId }) => {
 
       {/* Main Content */}
       <main className={`relative flex-1 flex flex-col items-center px-4 ${bgClasses} mt-0`}>
-        <div className="absolute top-0 z-[-2] h-screen w-screen bg-neutral-950 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))]"></div>
+        <div className="absolute top-0 z-[-2] h-screen w-screen bg-[#F5F5F4] bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))]"></div>
 
         <div className="w-full max-w-7xl flex flex-col gap-6 relative items-start mt-8">
           {/* Top Section - Chat and Todo */}
@@ -872,7 +872,7 @@ export const MainApp: React.FC<MainAppProps> = ({ pageId }) => {
           {/* Notes Section - Full Width */}
           <div className="w-full">
             <h2 className={`text-xl font-normal mb-3 tracking-tighter ${iconClasses}`}>Notes</h2>
-            <div className={`${cardClasses} rounded-lg p-4`}>
+            <div className={`${cardClasses} rounded-lg p-4 shadow border border-zinc-300`}>
               {!isCreatingNote && (
                 <button
                   onClick={() => setIsCreatingNote(true)}
@@ -1026,8 +1026,15 @@ export const MainApp: React.FC<MainAppProps> = ({ pageId }) => {
         </a>
       )}
 
+      {/* Footer 
+      <section className="relative bg-[#F5F5F4] w-full py-6 px-4 mt-1">
+        <div className="max-w-7xl mx-auto text-center">
+          <p></p>
+        </div>
+      </section> */}
+
       {/* Footer */}
-      <footer className="relative w-full py-6 px-4 mt-1">
+      <footer className="relative w-full py-6 px-4 mt-5">
         <div className="max-w-7xl mx-auto text-center">
           <p className={`${iconClasses} text-sm mb-2`}>
             All Chats and Reminders are cleared daily via{" "}
