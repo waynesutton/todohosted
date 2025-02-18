@@ -7,11 +7,13 @@ const AdminDashboard = () => {
   const { user } = useUser();
   const messages = useQuery(api.messages.get) ?? [];
   const todos = useQuery(api.todos.get) ?? [];
+  const pages = useQuery(api.pages.list) ?? [];
 
   const deleteAllMessages = useMutation(api.messages.deleteAllMessages);
   const deleteAllTodos = useMutation(api.todos.deleteAllTodos);
   const deleteMessage = useMutation(api.messages.deleteMessage);
   const deleteTodo = useMutation(api.todos.remove);
+  const deleteAllPageDocs = useMutation(api.docs.deleteAllPageDocs);
 
   return (
     <div className="p-8 font-sans">
@@ -23,6 +25,45 @@ const AdminDashboard = () => {
             <UserButton />
           </div>
         </div>
+
+        <section className="mb-8">
+          <h2 className="text-xl font-semibold mb-2">Pages</h2>
+          <div className="space-y-4">
+            {pages.map((page) => {
+              const pageDocs = useQuery(api.docs.getPageDocs, { pageId: page._id }) ?? [];
+              return (
+                <div key={page._id} className="p-4 border rounded">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-lg font-medium">{page.title}</h3>
+                    <button
+                      className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+                      onClick={async () => {
+                        if (window.confirm("Delete all docs for this page?")) {
+                          await deleteAllPageDocs({ pageId: page._id });
+                        }
+                      }}>
+                      Delete All Docs
+                    </button>
+                  </div>
+                  <div className="space-y-2">
+                    {pageDocs.map((doc) => (
+                      <div
+                        key={doc._id}
+                        className="p-2 border rounded flex justify-between items-center">
+                        <div>
+                          <p className="font-medium">{doc.title}</p>
+                          <p className="text-xs text-gray-500">
+                            Last updated: {new Date(doc.updatedAt).toLocaleString()}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
 
         <section className="mb-8">
           <h2 className="text-xl font-semibold mb-2">Chat Messages</h2>

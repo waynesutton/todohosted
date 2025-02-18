@@ -10,16 +10,22 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@assistant-ui/react": "latest",
+    "@assistant-ui/react-ai-sdk": "latest",
     "@clerk/clerk-react": "^5.22.12",
+    "@convex-dev/prosemirror-sync": "^0.1.13",
     "@liveblocks/client": "^2.18.1",
     "@liveblocks/react": "^2.18.1",
     "@liveblocks/react-tiptap": "^2.18.1",
     "@liveblocks/react-ui": "^2.18.1",
+    "@tiptap/extension-collaboration": "^2.11.5",
+    "@tiptap/extension-collaboration-cursor": "^2.11.5",
     "@tiptap/extension-document": "^2.11.5",
     "@tiptap/react": "^2.11.5",
     "@tiptap/starter-kit": "^2.11.5",
     "@types/node": "^22.13.1",
     "@types/react-syntax-highlighter": "^15.5.13",
+    "ai": "latest",
     "convex": "^1.17.4",
     "lucide-react": "^0.344.0",
     "openai": "^4.79.0",
@@ -28,10 +34,7 @@
     "react-dom": "^18.3.1",
     "react-markdown": "^9.0.3",
     "react-router-dom": "^7.1.5",
-    "react-syntax-highlighter": "^15.6.1",
-    "@assistant-ui/react": "latest",
-    "@assistant-ui/react-ai-sdk": "latest",
-    "ai": "latest"
+    "react-syntax-highlighter": "^15.6.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.9.1",

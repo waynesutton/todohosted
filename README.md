@@ -1,6 +1,6 @@
 # Realtime AI Chat, ToDo List, and Notes Sync App on Convex - Sync Engine
 
-An open source chat and reminder application built with [Convex](https://convex.link/chatsynclinks), Clerk, and React. This application features real-time chat, task management, and an administrative dashboard for moderation.
+An open source chat and reminder application built with [Convex](https://convex.link/chatsynclinks), Clerk, and React. This application features real-time chat, task management, collaborative document editing, and an administrative dashboard for moderation.
 
 ![Sync Engine Screenshot](https://syncengine.dev/syncenginescreenshot.png)
 
@@ -26,6 +26,29 @@ An open source chat and reminder application built with [Convex](https://convex.
   - Markdown support for rich text formatting
   - Real-time message streaming with typing indicators
   - Assistant UI integration for enhanced chat experience
+
+- **Collaborative Document Editing:**
+
+  - Real-time collaborative text editing with Liveblocks
+  - Multiple users can edit documents simultaneously
+  - Live presence indicators showing who is typing
+  - Document title collaboration
+  - Save and manage multiple documents per page
+  - Rich text formatting with TipTap editor
+  - Document version history
+  - Expandable document preview
+  - Quick actions for editing and deleting documents
+  - Live cursors and selections
+  - Collaborative comments and threads
+  - Document organization with titles and content
+  - Real-time updates across all clients
+  - Automatic content saving
+  - Document search and filtering
+  - Per-page document management
+  - Document deletion controls
+  - Document preview with content truncation
+  - Last updated timestamps
+  - Bulk document management per page
 
 - **User Experience:**
 
@@ -96,10 +119,14 @@ An open source chat and reminder application built with [Convex](https://convex.
   - Create and manage multiple chat rooms
   - Enable/disable chat rooms
   - View message and reminder statistics
-  - Toggle view for messages, todos, and notes per page
-  - Bulk actions for clearing messages, todos, and notes
+  - Toggle view for messages, todos, notes, and documents per page
+  - Bulk actions for clearing messages, todos, notes, and documents
   - Individual content management for each page
   - Real-time content updates
+  - Document management per page
+  - Document preview in admin interface
+  - Document deletion controls
+  - Document organization by page
 
 ## Stack
 
@@ -123,186 +150,42 @@ An open source chat and reminder application built with [Convex](https://convex.
 - **Hosting:**
   - Hosted on Netlify
 
-## Detailed Setup Instructions
+## Data Cleanup
 
-### 1. Initial Setup
+All data (chats, reminders, and notes) is automatically cleared daily at 12:01 AM PT via Convex Cron Jobs. This helps maintain a clean and fresh environment for all users.
 
-```bash
-# Clone the repository
-git clone <repository-url>
-cd todohosted
+## Getting Started
 
-# Install dependencies
-bun install
-```
-
-### 2. Convex Setup
-
-1. Install Convex CLI globally:
+1. Clone the repository:
 
    ```bash
-   npm install -g convex
+   git clone https://github.com/waynesutton/todohosted.git
+   cd todohosted
    ```
 
-2. Initialize Convex:
+2. Install dependencies:
 
    ```bash
-   npx convex dev
+   bun install
    ```
 
-3. This will create a new Convex project and provide you with a deployment URL. Add this URL to your `.env.local`:
-   ```env
+3. Set up environment variables:
+   Create a `.env.local` file with:
+
+   ```
    VITE_CONVEX_URL=your_convex_deployment_url
-   ```
-
-### 3. OpenAI Configuration
-
-1. Get your OpenAI API key from [OpenAI Platform](https://platform.openai.com/api-keys)
-
-2. Set the OpenAI API key in Convex:
-
-   ```bash
-   npx convex env set OPENAI_API_KEY=your_openai_api_key
-   ```
-
-3. Verify the key is set:
-   ```bash
-   npx convex env ls
-   ```
-
-### 4. Clerk Authentication Setup
-
-1. Create a new application at [Clerk Dashboard](https://dashboard.clerk.dev)
-
-2. Get your API keys from Clerk Dashboard:
-
-   - Publishable Key
-   - Secret Key
-
-3. Add Clerk environment variables to `.env.local`:
-   ```env
    VITE_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
-   VITE_CLERK_SECRET_KEY=your_clerk_secret_key
-   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
-   CLERK_SECRET_KEY=your_clerk_secret_key
+   OPENAI_API_KEY=your_openai_api_key
    ```
 
-### 5. Admin Role Configuration
-
-1. In your Clerk Dashboard:
-
-   - Go to JWT Templates
-   - Create a new template for admin roles
-   - Add the following claims:
-     ```json
-     {
-       "role": "admin"
-     }
-     ```
-
-2. Assign admin role to specific users:
-
-   - Go to Users in Clerk Dashboard
-   - Select the user you want to make admin
-   - Add metadata:
-     ```json
-     {
-       "role": "admin"
-     }
-     ```
-
-3. Update the `ModPage.tsx` component to check for admin role:
-
-   ```typescript
-   const AdminDashboard = () => {
-     const { user } = useUser();
-     const isAdmin = user?.publicMetadata?.role === "admin";
-
-     if (!isAdmin) return <div>Access Denied</div>;
-
-     // ... rest of the admin dashboard code
-   };
-   ```
-
-### 6. Development Environment
-
-1. Start the development server:
-
+4. Start the development server:
    ```bash
    bun dev
    ```
 
-2. Access the application:
-   - Main app: [http://localhost:3000](http://localhost:3000)
-   - Admin dashboard: [http://localhost:3000/mod](http://localhost:3000/mod)
+## Contributing
 
-### 7. Production Deployment
-
-1. Deploy to Netlify:
-
-   ```bash
-   netlify deploy --prod
-   ```
-
-2. Set environment variables in Netlify:
-
-   - Go to Site settings > Environment variables
-   - Add all required environment variables from `.env.local`
-
-3. Configure build settings:
-   - Build command: `bun run build`
-   - Publish directory: `dist`
-
-## How It Works
-
-1. **Real-time Data Sync:**
-
-   - Messages and reminders sync instantly using Convex's real-time subscriptions
-   - No page refreshes needed - everything updates live
-   - Vector search enables fast message searching
-   - Optimistic updates for instant UI feedback
-   - Daily cleanup at 1:00 AM PT (8:00 AM UTC)
-
-2. **Chat Features:**
-
-   - Type "@ai" to get AI responses streamed in real-time
-   - Type "remind me" to create a new reminder
-   - Click heart icon to like messages
-   - Use emoji button for quick reactions
-   - Search through message history instantly
-   - Toggle sound notifications with mute button
-   - iPhone-style message sounds for all chat messages
-
-3. **Reminder System:**
-
-   - Create reminders directly or via chat
-   - Check/uncheck to toggle completion
-   - Upvote/downvote to rate importance
-   - Hover to reveal delete option
-   - All changes sync in real-time
-
-4. **Admin Controls:**
-
-   - Secure admin access via Clerk auth
-   - Bulk or individual message deletion
-   - Reminder management interface
-   - Real-time moderation updates
-
-5. **Search System:**
-
-   - Real-time search as you type
-   - Vector-based semantic search
-   - Results ranked by relevance
-   - Highlights matching messages
-
-6. **Authentication:**
-   - Clerk handles user management
-   - Role-based access control
-   - Secure admin dashboard
-
-## Open Source
-
-This project is open source. Contributions are welcome! Feel free to open issues or submit pull requests.
+Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 

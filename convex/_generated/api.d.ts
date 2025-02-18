@@ -11,11 +11,13 @@
 import type * as cleanup from "../cleanup.js";
 import type * as config from "../config.js";
 import type * as crons from "../crons.js";
+import type * as docs from "../docs.js";
 import type * as messages from "../messages.js";
 import type * as pageMessages from "../pageMessages.js";
 import type * as pageNotes from "../pageNotes.js";
 import type * as pageTodos from "../pageTodos.js";
 import type * as pages from "../pages.js";
+import type * as prosemirror from "../prosemirror.js";
 import type * as todos from "../todos.js";
 
 import type {
@@ -35,11 +37,13 @@ declare const fullApi: ApiFromModules<{
   cleanup: typeof cleanup;
   config: typeof config;
   crons: typeof crons;
+  docs: typeof docs;
   messages: typeof messages;
   pageMessages: typeof pageMessages;
   pageNotes: typeof pageNotes;
   pageTodos: typeof pageTodos;
   pages: typeof pages;
+  prosemirror: typeof prosemirror;
   todos: typeof todos;
 }>;
 declare const fullApiWithMounts: typeof fullApi;

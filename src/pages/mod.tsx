@@ -14,7 +14,9 @@ const AdminDashboard = () => {
   const [newPageSlug, setNewPageSlug] = useState("");
   const [newPageTitle, setNewPageTitle] = useState("");
   const [expandedPages, setExpandedPages] = useState<Record<string, boolean>>({});
-  const [activeTab, setActiveTab] = useState<Record<string, "messages" | "todos" | "notes">>({});
+  const [activeTab, setActiveTab] = useState<
+    Record<string, "messages" | "todos" | "notes" | "docs">
+  >({});
   const [isDark, setIsDark] = useState(() => {
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("adminDarkMode");
@@ -41,13 +43,15 @@ const AdminDashboard = () => {
   const togglePageStatus = useMutation(api.pages.togglePageStatus);
   const deleteAllMessages = useMutation(api.pageMessages.deleteAllMessages);
   const deleteAllTodos = useMutation(api.todos.deleteAllTodos);
+  const deleteAllNotes = useMutation(api.pageNotes.deleteAllNotes);
+  const deleteAllPageDocs = useMutation(api.docs.deleteAllPageDocs);
   const deleteMessage = useMutation(api.pageMessages.deleteMessage);
   const deleteTodo = useMutation(api.todos.remove);
   const deleteNote = useMutation(api.pageNotes.deleteNote);
+  const deleteDoc = useMutation(api.docs.deleteDoc);
   const sendPageMessage = useMutation(api.pageMessages.send);
   const toggleLike = useMutation(api.pageMessages.toggleLike);
   const getMessagesForCsv = useMutation(api.pageMessages.getMessagesForCsv);
-  const deleteAllNotes = useMutation(api.pageNotes.deleteAllNotes);
 
   // Effect hooks
   React.useEffect(() => {
@@ -277,6 +281,15 @@ const AdminDashboard = () => {
                           className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600">
                           Clear Notes
                         </button>
+                        <button
+                          onClick={async () => {
+                            if (window.confirm("Delete all documents for this page?")) {
+                              await deleteAllPageDocs({ pageId: page._id });
+                            }
+                          }}
+                          className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600">
+                          Clear Docs
+                        </button>
                         {page.slug !== "default" && (
                           <button
                             onClick={() => {
@@ -330,6 +343,11 @@ const AdminDashboard = () => {
                           onClick={() => setActiveTab((prev) => ({ ...prev, [page._id]: "notes" }))}
                           className={`px-3 py-1 rounded ${activeTab[page._id] === "notes" ? "bg-blue-500 text-white" : `${mutedTextClasses} hover:bg-zinc-100 dark:hover:bg-zinc-700`}`}>
                           Notes
+                        </button>
+                        <button
+                          onClick={() => setActiveTab((prev) => ({ ...prev, [page._id]: "docs" }))}
+                          className={`px-3 py-1 rounded ${activeTab[page._id] === "docs" ? "bg-blue-500 text-white" : `${mutedTextClasses} hover:bg-zinc-100 dark:hover:bg-zinc-700`}`}>
+                          Docs
                         </button>
                       </div>
 
@@ -414,6 +432,35 @@ const AdminDashboard = () => {
                                 </button>
                               </div>
                             ))}
+
+                        {activeTab[page._id] === "docs" &&
+                          (useQuery(api.docs.getPageDocs, { pageId: page._id }) ?? []).map(
+                            (doc) => (
+                              <div
+                                key={doc._id}
+                                className={`p-2 border rounded flex justify-between items-center ${isDark ? "border-zinc-700" : "border-zinc-200"}`}>
+                                <div>
+                                  <p className="font-medium">{doc.title}</p>
+                                  <p>
+                                    {doc.content.slice(0, 100)}
+                                    {doc.content.length > 100 ? "..." : ""}
+                                  </p>
+                                  <p className={`text-xs ${mutedTextClasses}`}>
+                                    Last updated: {new Date(doc.updatedAt).toLocaleString()}
+                                  </p>
+                                </div>
+                                <button
+                                  className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+                                  onClick={async () => {
+                                    if (window.confirm("Delete this document?")) {
+                                      await deleteDoc({ id: doc._id });
+                                    }
+                                  }}>
+                                  Delete
+                                </button>
+                              </div>
+                            )
+                          )}
                       </div>
                     </div>
                   )}

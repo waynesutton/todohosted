@@ -3,12 +3,12 @@ import { internal } from "./_generated/api";
 
 const crons = cronJobs();
 
-// Schedule data cleanup at 1:00 AM PT (8:00 AM UTC)
+// Schedule data cleanup at 12:01 AM PT (8:01 AM UTC)
 crons.daily(
   "cleanup-data",
   {
-    hourUTC: 8, // 1:00 AM PT = 8:00 AM UTC
-    minuteUTC: 0,
+    hourUTC: 8,
+    minuteUTC: 1,
   },
   internal.cleanup.clearAllData
 );

@@ -62,4 +62,12 @@ export default defineSchema({
     createdAt: v.number(),
     updatedAt: v.number(),
   }).index("by_page", ["pageId"]),
+
+  pageDocs: defineTable({
+    pageId: v.id("pages"),
+    title: v.string(),
+    content: v.string(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  }).index("by_page", ["pageId"]),
 });
