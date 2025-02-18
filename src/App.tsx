@@ -1166,7 +1166,7 @@ export const MainApp: React.FC<MainAppProps> = ({ pageId }) => {
           <div className={`${cardClasses} rounded-lg max-w-md w-full p-6 relative`}>
             <h2 className={`text-xl font-medium ${textClasses} mb-4`}>⚠️ Public Demo Warning</h2>
             <p className={`${textClasses} mb-6`}>
-              Any text you enter in this demo is publicly visible to showcase multiplayer features.
+              Any text you enter in this demo is publicly visible to showcase Convex sync features.
               Please be kind!
             </p>
             <div className="flex justify-end">
