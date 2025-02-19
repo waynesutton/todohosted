@@ -1165,7 +1165,7 @@ export const MainApp: React.FC<MainAppProps> = ({ pageId }) => {
       <footer className="relative w-full py-6 px-4 mt-5">
         <div className="max-w-7xl mx-auto text-center">
           <p className={`${iconClasses} text-sm mb-2`}>
-            All data is cleared every five hour via{" "}
+            All data is cleared every five hours via{" "}
             <a
               href="https://docs.convex.dev/scheduling/cron-jobs"
               target="_blank"
