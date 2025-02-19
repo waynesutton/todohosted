@@ -219,6 +219,8 @@ export const MainApp: React.FC<MainAppProps> = ({ pageId }) => {
   const createNote = useMutation(api.pageNotes.createNote);
   const updateNote = useMutation(api.pageNotes.updateNote);
   const deleteNote = useMutation(api.pageNotes.deleteNote);
+  const createPage = useMutation(api.pages.createPage);
+  const sendPageMessage = useMutation(api.pageMessages.send);
 
   // State hooks
   const [isDark, setIsDark] = useState(false);
@@ -249,6 +251,8 @@ export const MainApp: React.FC<MainAppProps> = ({ pageId }) => {
   const [noteContent, setNoteContent] = useState("");
   const [copiedNoteId, setCopiedNoteId] = useState<Id<"pageNotes"> | null>(null);
   const [expandedNotes, setExpandedNotes] = useState<Record<Id<"pageNotes">, boolean>>({});
+  const [newPageSlug, setNewPageSlug] = useState("");
+  const [newPageTitle, setNewPageTitle] = useState("");
 
   // Ref hooks
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -409,6 +413,37 @@ export const MainApp: React.FC<MainAppProps> = ({ pageId }) => {
     navigator.clipboard.writeText(content);
     setCopiedNoteId(noteId);
     setTimeout(() => setCopiedNoteId(null), 2000);
+  };
+
+  const handleCreatePage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newPageSlug.trim() || !newPageTitle.trim()) return;
+
+    try {
+      const pageId = await createPage({
+        slug: newPageSlug.trim(),
+        title: newPageTitle.trim(),
+      });
+
+      if (pageId) {
+        setNewPageSlug("");
+        setNewPageTitle("");
+        await sendPageMessage({
+          pageId,
+          text: `Welcome to ${newPageTitle.trim()}!`,
+          sender: "System",
+        });
+        await sendPageMessage({
+          pageId,
+          text: 'Start typing to chat, use "@ai" to ask OpenAI, type "remind me" to set a reminder, or type "note:" to create a new note.',
+          sender: "System",
+        });
+        window.location.href = `/${newPageSlug.trim()}`;
+      }
+    } catch (error) {
+      console.error("Failed to create page:", error);
+      alert("Failed to create page. The URL might already be in use.");
+    }
   };
 
   // Message list rendering
@@ -990,13 +1025,77 @@ export const MainApp: React.FC<MainAppProps> = ({ pageId }) => {
                             </button>
                           </div>
                         </div>
-                        <p className={`${textClasses} whitespace-pre-wrap`}>
-                          {expandedNotes[note._id]
-                            ? note.content
-                            : note.content.length > 250
-                              ? `${note.content.slice(0, 250)}...`
-                              : note.content}
-                        </p>
+                        <div className={`${textClasses} whitespace-pre-wrap`}>
+                          {expandedNotes[note._id] ? (
+                            <ReactMarkdown
+                              components={{
+                                code({ inline, className, children, ...props }) {
+                                  const match = /language-(\w+)/.exec(className || "");
+                                  const code = String(children).replace(/\n$/, "");
+
+                                  if (!inline && match) {
+                                    return (
+                                      <div className="relative">
+                                        <div className="flex justify-between items-center bg-zinc-700 text-zinc-300 px-4 py-1 text-xs rounded-t">
+                                          <span>{match[1].toUpperCase()}</span>
+                                          <button
+                                            onClick={() => copyCode(code)}
+                                            className="hover:text-white transition-colors">
+                                            {copied ? "Copied!" : <Copy className="w-4 h-4" />}
+                                          </button>
+                                        </div>
+                                        <SyntaxHighlighter
+                                          language={match[1]}
+                                          style={isDark ? oneDark : oneLight}
+                                          customStyle={{
+                                            margin: 0,
+                                            borderTopLeftRadius: 0,
+                                            borderTopRightRadius: 0,
+                                          }}>
+                                          {code}
+                                        </SyntaxHighlighter>
+                                      </div>
+                                    );
+                                  }
+
+                                  return inline ? (
+                                    <code
+                                      className="bg-zinc-200 dark:bg-zinc-700 px-1 py-0.5 rounded"
+                                      {...props}>
+                                      {children}
+                                    </code>
+                                  ) : (
+                                    <div className="relative">
+                                      <div className="flex justify-between items-center bg-zinc-700 text-zinc-300 px-4 py-1 text-xs rounded-t">
+                                        <span>CODE</span>
+                                        <button
+                                          onClick={() => copyCode(code)}
+                                          className="hover:text-white transition-colors">
+                                          {copied ? "Copied!" : <Copy className="w-4 h-4" />}
+                                        </button>
+                                      </div>
+                                      <SyntaxHighlighter
+                                        language="plaintext"
+                                        style={isDark ? oneDark : oneLight}
+                                        customStyle={{
+                                          margin: 0,
+                                          borderTopLeftRadius: 0,
+                                          borderTopRightRadius: 0,
+                                        }}>
+                                        {code}
+                                      </SyntaxHighlighter>
+                                    </div>
+                                  );
+                                },
+                              }}>
+                              {note.content}
+                            </ReactMarkdown>
+                          ) : note.content.length > 250 ? (
+                            `${note.content.slice(0, 250)}...`
+                          ) : (
+                            note.content
+                          )}
+                        </div>
                         <div className={`text-xs ${mutedTextClasses} mt-2`}>
                           Last updated: {new Date(note.updatedAt).toLocaleString()}
                         </div>
@@ -1066,7 +1165,7 @@ export const MainApp: React.FC<MainAppProps> = ({ pageId }) => {
       <footer className="relative w-full py-6 px-4 mt-5">
         <div className="max-w-7xl mx-auto text-center">
           <p className={`${iconClasses} text-sm mb-2`}>
-            All data is cleared daily via{" "}
+            All data is cleared every five hour via{" "}
             <a
               href="https://docs.convex.dev/scheduling/cron-jobs"
               target="_blank"
@@ -1190,13 +1289,24 @@ export const MainApp: React.FC<MainAppProps> = ({ pageId }) => {
 function App() {
   const defaultPage = useQuery(api.pages.getPageBySlug, { slug: "default" });
   const createDefaultPage = useMutation(api.pages.createPage);
+  const sendPageMessage = useMutation(api.pageMessages.send);
 
   useEffect(() => {
     if (defaultPage === null)
-      createDefaultPage({ slug: "default", title: "Default Page" }).catch((error) => {
-        if (!error.message?.includes("already exists"))
-          console.error("Failed to create default page:", error);
-      });
+      createDefaultPage({ slug: "default", title: "Default Page" })
+        .then((pageId) => {
+          if (pageId) {
+            sendPageMessage({
+              pageId,
+              text: 'Start typing to chat, use "@ai" to ask OpenAI, type "remind me" to set a reminder, or type "note:" to create a new note.',
+              sender: "System",
+            });
+          }
+        })
+        .catch((error) => {
+          if (!error.message?.includes("already exists"))
+            console.error("Failed to create default page:", error);
+        });
   }, [defaultPage]);
 
   if (defaultPage === undefined)

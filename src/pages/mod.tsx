@@ -91,6 +91,11 @@ const AdminDashboard = () => {
           text: `Welcome to ${newPageTitle.trim()}!`,
           sender: "System",
         });
+        await sendPageMessage({
+          pageId,
+          text: 'Start typing to chat, use "@ai" to ask OpenAI, type "remind me" to set a reminder, or type "note:" to create a new note.',
+          sender: "System",
+        });
         window.location.href = `/${newPageSlug.trim()}`;
       }
     } catch (error) {
@@ -363,104 +368,21 @@ const AdminDashboard = () => {
                                   <p>
                                     <strong>{message.sender}</strong>: {message.text}
                                   </p>
-                                  <p className={`text-xs ${mutedTextClasses}`}>
+                                  <p className="text-xs text-gray-500">
                                     {new Date(message.timestamp).toLocaleString()}
                                   </p>
                                 </div>
                                 <button
-                                  className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
                                   onClick={async () => {
                                     if (window.confirm("Delete this message?")) {
                                       await deleteMessage({ id: message._id });
                                     }
-                                  }}>
+                                  }}
+                                  className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600">
                                   Delete
                                 </button>
                               </div>
                             ))}
-
-                        {activeTab[page._id] === "todos" &&
-                          pageTodos
-                            .filter((todo) => todo.pageId === page._id)
-                            .map((todo) => (
-                              <div
-                                key={todo._id}
-                                className={`p-2 border rounded flex justify-between items-center ${isDark ? "border-zinc-700" : "border-zinc-200"}`}>
-                                <div>
-                                  <p>{todo.text}</p>
-                                  <p className={`text-xs ${mutedTextClasses}`}>
-                                    Completed: {todo.completed ? "Yes" : "No"}
-                                  </p>
-                                </div>
-                                <button
-                                  className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
-                                  onClick={async () => {
-                                    if (window.confirm("Delete this todo?")) {
-                                      await deleteTodo({ id: todo._id });
-                                    }
-                                  }}>
-                                  Delete
-                                </button>
-                              </div>
-                            ))}
-
-                        {activeTab[page._id] === "notes" &&
-                          pageNotes
-                            .filter((note) => note.pageId === page._id)
-                            .map((note) => (
-                              <div
-                                key={note._id}
-                                className={`p-2 border rounded flex justify-between items-center ${isDark ? "border-zinc-700" : "border-zinc-200"}`}>
-                                <div>
-                                  <p className="font-medium">{note.title}</p>
-                                  <p>
-                                    {note.content.slice(0, 100)}
-                                    {note.content.length > 100 ? "..." : ""}
-                                  </p>
-                                  <p className={`text-xs ${mutedTextClasses}`}>
-                                    Last updated: {new Date(note.updatedAt).toLocaleString()}
-                                  </p>
-                                </div>
-                                <button
-                                  className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
-                                  onClick={async () => {
-                                    if (window.confirm("Delete this note?")) {
-                                      await deleteNote({ id: note._id });
-                                    }
-                                  }}>
-                                  Delete
-                                </button>
-                              </div>
-                            ))}
-
-                        {activeTab[page._id] === "docs" &&
-                          (useQuery(api.docs.getPageDocs, { pageId: page._id }) ?? []).map(
-                            (doc) => (
-                              <div
-                                key={doc._id}
-                                className={`p-2 border rounded flex justify-between items-center ${isDark ? "border-zinc-700" : "border-zinc-200"}`}>
-                                <div>
-                                  <p className="font-medium">{doc.title}</p>
-                                  <p>
-                                    {doc.content.slice(0, 100)}
-                                    {doc.content.length > 100 ? "..." : ""}
-                                  </p>
-                                  <p className={`text-xs ${mutedTextClasses}`}>
-                                    Last updated: {new Date(doc.updatedAt).toLocaleString()}
-                                  </p>
-                                </div>
-                                <button
-                                  className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
-                                  onClick={async () => {
-                                    if (window.confirm("Delete this document?")) {
-                                      await deleteDoc({ id: doc._id });
-                                    }
-                                  }}>
-                                  Delete
-                                </button>
-                              </div>
-                            )
-                          )}
                       </div>
                     </div>
                   )}
@@ -468,127 +390,10 @@ const AdminDashboard = () => {
               ))}
             </div>
           </section>
-
-          <section className="mb-8">
-            <h2 className="text-xl font-semibold mb-2">Chat Messages</h2>
-            {/* <button
-              className="mb-4 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-              onClick={async () => {
-                if (window.confirm("Are you sure you want to delete all chat messages?")) {
-                  await deleteAllMessages();
-                }
-              }}>
-              Delete All Chat Messagess
-            </button> */}
-            <div className="space-y-2">
-              {messages.map((message) => (
-                <div
-                  key={message._id}
-                  className={`p-2 border rounded flex justify-between items-center ${cardClasses} ${isDark ? "border-zinc-700" : "border-zinc-200"}`}>
-                  <div>
-                    <p>
-                      <strong>{message.sender}</strong>: {message.text}
-                    </p>
-                    <p className={`text-xs ${mutedTextClasses}`}>
-                      {new Date(message.timestamp).toLocaleString()}
-                    </p>
-                  </div>
-                  <button
-                    className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
-                    onClick={async () => {
-                      if (window.confirm("Delete this message?")) {
-                        await deleteMessage({ id: message._id });
-                      }
-                    }}>
-                    Delete
-                  </button>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          <section>
-            <h2 className="text-xl font-semibold mb-2">Reminders</h2>
-            {/* <button
-              className="mb-4 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-              onClick={async () => {
-                if (window.confirm("Are you sure you want to delete all reminders?")) {
-                  await deleteAllTodos();
-                }
-              }}>
-              Delete All Reminderss
-            </button> */}
-            <div className="space-y-2">
-              {todos.map((todo) => (
-                <div
-                  key={todo._id}
-                  className={`p-2 border rounded flex justify-between items-center ${cardClasses} ${isDark ? "border-zinc-700" : "border-zinc-200"}`}>
-                  <div>
-                    <p>{todo.text}</p>
-                    <p className={`text-xs ${mutedTextClasses}`}>
-                      Completed: {todo.completed ? "Yes" : "No"}
-                    </p>
-                  </div>
-                  <button
-                    className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
-                    onClick={async () => {
-                      if (window.confirm("Delete this reminder?")) {
-                        await deleteTodo({ id: todo._id });
-                      }
-                    }}>
-                    Delete
-                  </button>
-                </div>
-              ))}
-            </div>
-          </section>
         </div>
       </div>
-
-      {/* Footer */}
-      <footer className={`relative w-full py-6 px-4 mt-[0px] ${cardClasses}`}>
-        <div className="max-w-7xl mx-auto text-center">
-          <p className={`text-sm mb-2 ${mutedTextClasses}`}>
-            All Chats and Reminders are cleared daily via{" "}
-            <a
-              href="https://docs.convex.dev/scheduling/cron-jobs"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-500 hover:opacity-80 transition-opacity">
-              Convex Cron Jobs
-            </a>
-          </p>
-          <p className={`text-sm ${mutedTextClasses}`}>
-            Open Source and built with with ❤️ at{" "}
-            <a
-              href="https://convex.link/chatsynclinks"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:opacity-80 transition-opacity">
-              Convex
-            </a>
-            . Powered by{" "}
-            <a
-              href="https://convex.link/chatsynclinks"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:opacity-80 transition-opacity">
-              Convex
-            </a>
-            . The source code is available on{" "}
-            <a
-              href="https://github.com/waynesutton/todohosted"
-              target="_blank"
-              rel="noopener noreferrer">
-              GitHub
-            </a>
-            .
-          </p>
-        </div>
-      </footer>
     </div>
   );
 };
 
-export const ModPage = AdminDashboard;
-export default ModPage;
+export default AdminDashboard;
