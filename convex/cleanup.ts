@@ -37,7 +37,7 @@ export const clearAllData = internalMutation({
       await ctx.db.insert("pageMessages", {
         pageId: page._id,
         sender: "System",
-        text: 'Start typing to chat, use "@ai" to ask OpenAI, type "remind me" to set a reminder, or type "note:" to create a new note.',
+        text: 'Start typing to chat, type "remind me" to set a reminder, or type "note:" to create a new note.',
         timestamp: Date.now(),
       });
     }

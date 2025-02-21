@@ -93,7 +93,7 @@ const AdminDashboard = () => {
         });
         await sendPageMessage({
           pageId,
-          text: 'Start typing to chat, use "@ai" to ask OpenAI, type "remind me" to set a reminder, or type "note:" to create a new note.',
+          text: 'Start typing to chat, type "remind me" to set a reminder, or type "note:" to create a new note.',
           sender: "System",
         });
         window.location.href = `/${newPageSlug.trim()}`;

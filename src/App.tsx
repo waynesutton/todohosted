@@ -214,7 +214,6 @@ export const MainApp: React.FC<MainAppProps> = ({ pageId }) => {
   const sendMessage = useMutation(api.pageMessages.send);
   const upvote = useMutation(api.todos.upvote);
   const downvote = useMutation(api.todos.downvote);
-  const askAIAction = useMutation(api.messages.askAI);
   const searchMessages = useAction(api.messages.searchMessages);
   const createNote = useMutation(api.pageNotes.createNote);
   const updateNote = useMutation(api.pageNotes.updateNote);
@@ -234,7 +233,6 @@ export const MainApp: React.FC<MainAppProps> = ({ pageId }) => {
     }
     return false;
   });
-  const [isMuted, setIsMuted] = useState(false);
   const [newTodo, setNewTodo] = useState("");
   const [newMessage, setNewMessage] = useState("");
   const [streamedMessage, setStreamedMessage] = useState("");
@@ -256,7 +254,6 @@ export const MainApp: React.FC<MainAppProps> = ({ pageId }) => {
 
   // Ref hooks
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const audioRef = useRef<HTMLAudioElement>(null);
   const initialLoadRef = useRef(true);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
 
@@ -280,15 +277,6 @@ export const MainApp: React.FC<MainAppProps> = ({ pageId }) => {
       setStreamedMessage(message.text);
     }
   }, [messages, streamedMessageId]);
-
-  useEffect(() => {
-    if (messages && messages.length > 0 && !isMuted && hasUserInteracted) {
-      const lastMessage = messages[0];
-      if (lastMessage) {
-        audioRef.current?.play().catch(console.error);
-      }
-    }
-  }, [messages, isMuted, hasUserInteracted]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -330,13 +318,7 @@ export const MainApp: React.FC<MainAppProps> = ({ pageId }) => {
     }
     if (!newMessage.trim() || !pageId) return;
 
-    if (newMessage.trim().startsWith("@ai")) {
-      const prompt = newMessage.slice(3).trim() || "Hello! How can I help you today?";
-      await sendMessage({ text: newMessage.trim(), sender: username, pageId });
-      const messageId = await askAIAction({ prompt, pageId });
-      setStreamedMessageId(messageId);
-      setStreamedMessage("");
-    } else if (newMessage.toLowerCase().includes("remind me") && pageId) {
+    if (newMessage.toLowerCase().includes("remind me") && pageId) {
       const reminderText = newMessage.toLowerCase().replace("remind me", "").trim();
 
       if (reminderText) {
@@ -435,7 +417,7 @@ export const MainApp: React.FC<MainAppProps> = ({ pageId }) => {
         });
         await sendPageMessage({
           pageId,
-          text: 'Start typing to chat, use "@ai" to ask OpenAI, type "remind me" to set a reminder, or type "note:" to create a new note.',
+          text: 'Start typing to chat, type "remind me" to set a reminder, or type "note:" to create a new note.',
           sender: "System",
         });
         window.location.href = `/${newPageSlug.trim()}`;
@@ -774,15 +756,6 @@ export const MainApp: React.FC<MainAppProps> = ({ pageId }) => {
                 className={`text-xl font-normal mb-3 tracking-tighter ${iconClasses} flex items-center gap-2`}>
                 Chat
                 <span className="text-sm">(Public)</span>
-                <button
-                  onClick={() => {
-                    setIsMuted(!isMuted);
-                    if (!isMuted) audioRef.current?.pause();
-                  }}
-                  className={`${iconClasses} hover:opacity-80 transition-opacity ml-2`}
-                  aria-label={isMuted ? "Unmute chat sounds" : "Mute chat sounds"}>
-                  {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
-                </button>
               </h2>
               <div
                 className={`${cardClasses} rounded-lg p-4 h-[600px] flex flex-col border border-zinc-300 shadow`}>
@@ -843,8 +816,7 @@ export const MainApp: React.FC<MainAppProps> = ({ pageId }) => {
                         {username}
                       </button>
                     )}
-                    <input
-                      type="text"
+                    <textarea
                       id="message-input"
                       name="message"
                       value={newMessage}
@@ -854,20 +826,27 @@ export const MainApp: React.FC<MainAppProps> = ({ pageId }) => {
                           setShowWarning(true);
                         }
                       }}
-                      placeholder="Chat or @ai or remind me or note:..."
-                      className={`bg-transparent flex-1 outline-none ${textClasses} placeholder-zinc-500`}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && !e.shiftKey) {
+                          e.preventDefault();
+                          handleSubmitMessage(e);
+                        }
+                      }}
+                      placeholder="Chat or remind me or note:..."
+                      className={`bg-transparent flex-1 outline-none ${textClasses} placeholder:hidden sm:placeholder:inline-block placeholder-zinc-500 resize-none overflow-hidden min-h-[24px] max-h-32`}
+                      rows={1}
+                      style={{ height: "auto" }}
+                      onInput={(e) => {
+                        const target = e.target as HTMLTextAreaElement;
+                        target.style.height = "auto";
+                        target.style.height = target.scrollHeight + "px";
+                      }}
                     />
                     <button
                       type="button"
                       onClick={sendEmoji}
                       className={`${isDark ? "text-zinc-400" : "text-zinc-500"} hover:text-yellow-500 transition-colors`}>
                       <Smile className="w-4 h-4" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setNewMessage("@ai")}
-                      className={`${isDark ? "text-zinc-400" : "text-zinc-500"} hover:text-blue-500 transition-colors`}>
-                      Ask AI
                     </button>
                     <button
                       type="submit"
@@ -1164,8 +1143,8 @@ export const MainApp: React.FC<MainAppProps> = ({ pageId }) => {
       {/* Footer */}
       <footer className="relative w-full py-6 px-4 mt-5">
         <div className="max-w-7xl mx-auto text-center">
-          <p className={`${iconClasses} text-sm mb-2`}>
-            All data is cleared every five hours via{" "}
+          <p className={`${iconClasses} text-sm font-bold mb-2`}>
+            All data is cleared every 1 hour via{" "}
             <a
               href="https://docs.convex.dev/scheduling/cron-jobs"
               target="_blank"
@@ -1197,11 +1176,6 @@ export const MainApp: React.FC<MainAppProps> = ({ pageId }) => {
         </div>
       </footer>
 
-      {/* Audio Element */}
-      <audio ref={audioRef} preload="auto">
-        <source src="/message.mp3" type="audio/mpeg" />
-      </audio>
-
       {/* Features Modal */}
       {showFeaturesModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
@@ -1222,13 +1196,11 @@ export const MainApp: React.FC<MainAppProps> = ({ pageId }) => {
                 <h3 className={`text-lg font-medium ${textClasses} mb-3`}>Real-time Chat</h3>
                 <ul className={`list-disc pl-5 space-y-2 ${textClasses}`}>
                   <li>Send and receive chat messages instantly</li>
-                  <li>AI-powered chat responses using "@ai" command</li>
                   <li>Create reminders by typing "remind me" in chat</li>
                   <li>Create notes by typing "note:" in chat</li>
                   <li>Search functionality for messages</li>
                   <li>Like messages and see like counts</li>
                   <li>Send emoji reactions</li>
-                  <li>Message sound notifications with mute control</li>
                 </ul>
               </div>
 
@@ -1240,7 +1212,6 @@ export const MainApp: React.FC<MainAppProps> = ({ pageId }) => {
                   <li>Title and content organization</li>
                   <li>Preview with content truncation</li>
                   <li>Copy note content with one click</li>
-                  <li>Real-time updates across all clients</li>
                 </ul>
               </div>
 
@@ -1298,7 +1269,7 @@ function App() {
           if (pageId) {
             sendPageMessage({
               pageId,
-              text: 'Start typing to chat, use "@ai" to ask OpenAI, type "remind me" to set a reminder, or type "note:" to create a new note.',
+              text: 'Start typing to chat, type "remind me" to set a reminder, or type "note:" to create a new note.',
               sender: "System",
             });
           }

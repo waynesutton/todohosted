@@ -18,15 +18,14 @@ An open source chat and reminder application built with [Convex](https://convex.
   - Search functionality for messages using vector search
   - Like messages and see like counts
   - Send emoji reactions
-  - Message sound notifications with mute control
-  - Instant muting of chat sounds
   - Threaded AI responses
   - Message highlighting for search results
   - Code block syntax highlighting with copy functionality
   - Markdown support for rich text formatting
   - Real-time message streaming with typing indicators
   - Assistant UI integration for enhanced chat experience
-  - Automatic cleanup every 5 hours with system message restoration
+  - Automatic cleanup every hour with system message restoration
+  - Easy to integrate OpenAI chat features (not included by default)
 
 - **Collaborative Document Editing:**
 
@@ -56,7 +55,6 @@ An open source chat and reminder application built with [Convex](https://convex.
   - First-time user warning about public content
   - Customizable username setting
   - Mobile-responsive design
-  - Sound notifications with mute option
   - Real-time message streaming
   - Instant search results
   - Beautiful UI with smooth transitions
@@ -68,7 +66,7 @@ An open source chat and reminder application built with [Convex](https://convex.
   - Accessible UI elements with ARIA labels
   - Smooth scrolling to highlighted messages
   - Copy functionality for code blocks and notes
-  - Automatic data cleanup every 5 hours
+  - Automatic data cleanup every hour
 
 - **Notes:**
 
@@ -149,7 +147,6 @@ An open source chat and reminder application built with [Convex](https://convex.
 - **Backend:**
 
   - **Database & Functions:** [Convex](https://convex.link/chatsynclinks)
-  - **AI Integration:** OpenAI GPT-4
   - **Vector Search:** Convex Vector Search
   - **Cron Jobs:** Convex Scheduling
   - **WebSocket:** Convex Real-time Sync
@@ -166,7 +163,7 @@ An open source chat and reminder application built with [Convex](https://convex.
 
 ## Data Cleanup
 
-All data (chats, reminders, notes, and documents) is automatically cleared every 5 hours starting at 12:00 PM PT via Convex Cron Jobs. After each cleanup, a system message is automatically posted to each chat to maintain context. This helps maintain a clean and fresh environment for all users.
+All data (chats, reminders, notes, and documents) is automatically cleared every hour via Convex Cron Jobs. After each cleanup, a system message is automatically posted to each chat to maintain context. This helps maintain a clean and fresh environment for all users.
 
 ## Getting Started
 
