@@ -1089,7 +1089,7 @@ export const MainApp: React.FC<MainAppProps> = ({ pageId }) => {
           {/* Docs Section - Full Width */}
           <div className="w-full">
             <h2 className={`text-xl font-normal mb-3 tracking-tighter ${iconClasses}`}>
-              Collaborative Docs <span className="text-sm">(Public)</span>
+              Multiplayer Doc <span className="text-sm">(Public)</span>
             </h2>
             <div className={`${cardClasses} rounded-lg p-4 shadow border border-zinc-300`}>
               <TipTapEditor />
