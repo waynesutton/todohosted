@@ -68,7 +68,7 @@ const AboutPage = () => {
               Docs
             </a>
             <a
-              href="https://stack.convex.dev/"
+              href="https://stack.convex.dev/tag/Local-First"
               target="_blank"
               rel="noopener noreferrer"
               className={`${iconClasses} hover:opacity-80 transition-opacity`}>
